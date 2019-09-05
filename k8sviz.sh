@@ -44,16 +44,15 @@ function escape_name () {
 
 function normalize_kind () {
   local kind=$1
+  local lower_kind=$(echo $kind | tr '[:upper:]' '[:lower:]')
  
   for nname in "${!NAMES[@]}";do
-    echo "${kind}" | grep -iqF ${nname}
-    if [ $? -eq 0 ];then
+    if [ "${lower_kind}" == "${nname}" ];then
       echo ${nname}
       return
     fi
 
-    echo "${kind}" | grep -iqF ${NAMES[${nname}]}
-    if [ $? -eq 0 ];then
+    if [ "${lower_kind}" == "${NAMES[${nname}]}" ];then
       echo ${nname}
       return
     fi
