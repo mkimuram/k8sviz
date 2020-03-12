@@ -1,15 +1,16 @@
 #! /bin/bash
 
-#### Constants ####
-NS_IMG=./icons/ns-128.png
-SVC_IMG=./icons/svc-128.png
-PVC_IMG=./icons/pvc-128.png
-POD_IMG=./icons/pod-128.png
-STS_IMG=./icons/sts-128.png
-DS_IMG=./icons/ds-128.png
-RS_IMG=./icons/rs-128.png
-DEPLOY_IMG=./icons/deploy-128.png
-JOB_IMG=./icons/job-128.png
+#### Image file path ####
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+NS_IMG=${SCRIPT_DIR}/icons/ns-128.png
+SVC_IMG=${SCRIPT_DIR}/icons/svc-128.png
+PVC_IMG=${SCRIPT_DIR}/icons/pvc-128.png
+POD_IMG=${SCRIPT_DIR}/icons/pod-128.png
+STS_IMG=${SCRIPT_DIR}/icons/sts-128.png
+DS_IMG=${SCRIPT_DIR}/icons/ds-128.png
+RS_IMG=${SCRIPT_DIR}/icons/rs-128.png
+DEPLOY_IMG=${SCRIPT_DIR}/icons/deploy-128.png
+JOB_IMG=${SCRIPT_DIR}/icons/job-128.png
 
 declare -A IMGS=( ["ns"]="${NS_IMG}" ["svc"]="${SVC_IMG}" ["pvc"]="${PVC_IMG}" ["pod"]="${POD_IMG}" ["sts"]="${STS_IMG}" ["ds"]="${DS_IMG}" ["rs"]="${RS_IMG}" ["deploy"]="${DEPLOY_IMG}" ["job"]="${JOB_IMG}")
 declare -A NAMES=( ["ns"]="namespace" ["svc"]="service" ["pvc"]="persistentvolumeclaim" ["pod"]="po" ["sts"]="statefulset" ["ds"]="daemonset" ["rs"]="replicaset" ["deploy"]="deployment" ["job"]="job")
