@@ -4,8 +4,12 @@ k8sviz is a tool to generate Kubernetes architecture diagrams from the actual st
 Currently, this only generates a diagram similar to https://github.com/kubernetes/community/tree/master/icons#usage-example by using [graphviz](https://www.graphviz.org/).
 For examples of the generated diagrams, see [Examples](#examples) below.
 
+## Implementations
+There are two implementations, bash script version and go version. Bash script version was intended to be just a prototype. So, it will be migrated to go version.
+
 ## Prerequisites
-`k8sviz.sh` is implemented as bash script and depends on below commands:
+### Bash script version
+`k8sviz.sh` depends on below commands:
 - awk
 - bash
 - cat
@@ -17,10 +21,25 @@ For examples of the generated diagrams, see [Examples](#examples) below.
 - seq
 - tr
 
+### Go version
+`k8sviz` only depends dot (graphviz) command.
+
 ## Installation
+### Bash script version
 Just git clone this repository or copy `k8sviz.sh` file and `icons` directory with keeping directory structure.
 
+### Go version
+```
+$ git clone https://github.com/mkimuram/k8sviz.git
+$ cd k8sviz
+$ export GO111MODULE=on
+$ go build -o k8sviz .
+```
+
+k8sviz binary can be moved to another directory, but `icons` directory needs to be in the same directory to the binary.
+
 ## Usage
+### Bash script version
 ```
 $ ./k8sviz.sh --help
 Generate Kubernetes architecture diagrams from the actual state in a namespace
@@ -33,7 +52,30 @@ Options:
   -t, --type                 The type of output. Default is dot
 ```
 
+### Go version
+```
+$ ./k8sviz -h
+Usage of ./k8sviz:
+  -kubeconfig string
+        absolute path to the kubeconfig file (default "/root/.kube/config")
+  -n string
+        namespace to visualize (shorthand) (default "namespace")
+  -namespace string
+        namespace to visualize (default "namespace")
+  -o string
+        output filename (shorthand) (default "k8sviz.out")
+  -outfile string
+        output filename (default "k8sviz.out")
+  -t string
+        type of output (shorthand) (default "dot")
+  -type string
+        type of output (default "dot")
+```
+
 ## Examples
+Examples are only shown for bash script version, but go version should work in the same way.
+Report bugs or critical differences, if you find any.
+
 ### Examples for tutorial deployments in default namespace
 - Generate dot file for namespace `default`
 ```
