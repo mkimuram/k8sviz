@@ -11,7 +11,7 @@ There are two implementations, bash script version and go version. Bash script v
 ### Bash script version
 `k8sviz.sh` depends on below commands:
 - awk
-- bash
+- bash (version 4 or later)
 - cat
 - dot (graphviz)
 - getopt

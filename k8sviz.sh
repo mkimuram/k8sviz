@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 #### Image file path ####
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
@@ -12,7 +12,8 @@ RS_IMG=${SCRIPT_DIR}/icons/rs-128.png
 DEPLOY_IMG=${SCRIPT_DIR}/icons/deploy-128.png
 JOB_IMG=${SCRIPT_DIR}/icons/job-128.png
 
-declare -A IMGS=( ["ns"]="${NS_IMG}" ["svc"]="${SVC_IMG}" ["pvc"]="${PVC_IMG}" ["pod"]="${POD_IMG}" ["sts"]="${STS_IMG}" ["ds"]="${DS_IMG}" ["rs"]="${RS_IMG}" ["deploy"]="${DEPLOY_IMG}" ["job"]="${JOB_IMG}")
+declare -A IMGS=( ["ns"]="${NS_IMG}" ["svc"]="${SVC_IMG}" ["pvc"]="${PVC_IMG}" ["pod"]="${POD_IMG}" ["sts"]="${STS_IMG}" ["ds"]="${DS_IMG}" ["rs"]="${RS_IMG}" ["deploy"]="${DEPLOY_IMG}" ["job"]="${JOB_IMG}") \
+|| echo "Bash doesn't support associative arrays. Use bash version 4 or later." && exit 1
 declare -A NAMES=( ["ns"]="namespace" ["svc"]="service" ["pvc"]="persistentvolumeclaim" ["pod"]="po" ["sts"]="statefulset" ["ds"]="daemonset" ["rs"]="replicaset" ["deploy"]="deployment" ["job"]="job")
 declare -a RESOURCES=("deploy job" "sts ds rs" "pod" "pvc" "svc")
 
