@@ -68,10 +68,16 @@ DIR=$(dirname ${OUTFILE})
 ABSDIR=$(cd ${DIR}; pwd -P)
 FILENAME=$(basename ${OUTFILE})
 
+# Make KUBECONFIG to absolute path
+KUBEDIR=$(dirname ${KUBECONFIG})
+ABSKUBEDIR=$(cd ${KUBEDIR}; pwd -P)
+KUBEFILE=$(basename ${KUBECONFIG})
+KUBECONFIG="${ABSKUBEDIR}/${KUBEFILE}"
+
 # Check if KUBECONFIG file exists
 if [ ! -f "${KUBECONFIG}" ];then
   echo "KUBECONFIG file wasn't found in ${KUBECONFIG}." >&2
-  echo "You may need to specify the path with --kubeconfig option." >&2
+  echo "You need to specify the right path with --kubeconfig option." >&2
   exit 1
 fi
 
