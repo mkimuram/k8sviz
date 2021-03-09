@@ -5,28 +5,22 @@ Currently, this only generates a diagram similar to https://github.com/kubernete
 For examples of the generated diagrams, see [Examples](#examples) below.
 
 ## Implementations
-There are two implementations, bash script version and go version. Bash script version was intended to be just a prototype. So, it will be migrated to go version.
+There are two implementations, bash script version and go version. Bash script version is just a wrapper to run go version inside container. 
 
 ## Prerequisites
 ### Bash script version
-`k8sviz.sh` depends on below commands:
-- awk
-- bash
-- cat
-- dot (graphviz)
-- getopt
-- grep
-- kubectl
-- sed
-- seq
-- tr
+`k8sviz.sh` depends on docker.
 
 ### Go version
 `k8sviz` only depends dot (graphviz) command.
 
 ## Installation
 ### Bash script version
-Just git clone this repository or copy `k8sviz.sh` file and `icons` directory with keeping directory structure.
+Just download `k8sviz.sh` file and add execution permission.
+```
+$ curl -LO https://raw.githubusercontent.com/mkimuram/k8sviz/master/k8sviz.sh
+$ chmod u+x k8sviz.sh
+```
 
 ### Go version
 ```
@@ -50,6 +44,8 @@ Options:
   -n, --namespace            The namespace to visualize. Default is default
   -o, --outfile              The filename to output. Default is k8sviz.out
   -t, --type                 The type of output. Default is dot
+  -k, --kubeconfig           Path to kubeconfig file. Default is ~/kubeconfig
+  -i, --image                Image name of the container. Default is mkimuram/k8sviz:0.2
 ```
 
 ### Go version
