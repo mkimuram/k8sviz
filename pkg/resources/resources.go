@@ -34,6 +34,7 @@ var (
 
 type Resources struct {
 	clientset *kubernetes.Clientset
+	Namespace string
 
 	Svcs      *corev1.ServiceList
 	Pvcs      *corev1.PersistentVolumeClaimList
@@ -48,7 +49,7 @@ type Resources struct {
 
 func NewResources(clientset *kubernetes.Clientset, namespace string) *Resources {
 	var err error
-	res := &Resources{clientset: clientset}
+	res := &Resources{clientset: clientset, Namespace: namespace}
 
 	// service
 	res.Svcs, err = clientset.CoreV1().Services(namespace).List(metav1.ListOptions{})
