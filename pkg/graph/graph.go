@@ -58,6 +58,17 @@ func (g *Graph) toDot() string {
 }
 
 func (g *Graph) generate() {
+	// generate common part of graph
+	g.generateCommon()
+
+	// Put resources as Nodes in each rank of subgraph
+	g.generateNodes()
+
+	// Connect resources
+	g.generateEdges()
+}
+
+func (g *Graph) generateCommon() {
 	g.gviz.SetDir(true)
 	g.gviz.SetName("G")
 	g.gviz.AddAttr("G", "rankdir", "TD")
@@ -79,8 +90,9 @@ func (g *Graph) generate() {
 		g.gviz.AddEdge(g.rankDummyNodeName(r), g.rankDummyNodeName(r+1), true,
 			map[string]string{"style": "invis"})
 	}
+}
 
-	// Put resources as Nodes in each rank of subgraph
+func (g *Graph) generateNodes() {
 	for r, rankRes := range resources.ResourceTypes {
 		for _, resType := range strings.Fields(rankRes) {
 			for _, name := range g.res.GetResourceNames(resType) {
@@ -89,9 +101,26 @@ func (g *Graph) generate() {
 			}
 		}
 	}
+}
 
-	// Connect resources
+func (g *Graph) generateEdges() {
 	// Owner reference for pod
+	g.genPodOwnerRef()
+
+	// Owner reference for rs
+	g.genRsOwnerRef()
+
+	// pvc and pod
+	g.genPvcPodRef()
+
+	// svc and pod
+	g.genSvcPodRef()
+
+	// ingress and svc
+	g.genIngSvcRef()
+}
+
+func (g *Graph) genPodOwnerRef() {
 	for _, pod := range g.res.Pods.Items {
 		for _, ref := range pod.GetOwnerReferences() {
 			ownerKind, err := resources.NormalizeResource(ref.Kind)
@@ -107,7 +136,9 @@ func (g *Graph) generate() {
 				map[string]string{"style": "dashed"})
 		}
 	}
-	// Owner reference for rs
+}
+
+func (g *Graph) genRsOwnerRef() {
 	for _, rs := range g.res.Rss.Items {
 		for _, ref := range rs.GetOwnerReferences() {
 			ownerKind, err := resources.NormalizeResource(ref.Kind)
@@ -124,8 +155,9 @@ func (g *Graph) generate() {
 				map[string]string{"style": "dashed"})
 		}
 	}
+}
 
-	// pvc and pod
+func (g *Graph) genPvcPodRef() {
 	for _, pod := range g.res.Pods.Items {
 		for _, vol := range pod.Spec.Volumes {
 			if vol.VolumeSource.PersistentVolumeClaim != nil {
@@ -139,8 +171,9 @@ func (g *Graph) generate() {
 			}
 		}
 	}
+}
 
-	// svc and pod
+func (g *Graph) genSvcPodRef() {
 	for _, svc := range g.res.Svcs.Items {
 		if len(svc.Spec.Selector) == 0 {
 			continue
@@ -163,8 +196,9 @@ func (g *Graph) generate() {
 			}
 		}
 	}
+}
 
-	// ingress and svc
+func (g *Graph) genIngSvcRef() {
 	for _, ing := range g.res.Ingresses.Items {
 		for _, rule := range ing.Spec.Rules {
 			for _, path := range rule.IngressRuleValue.HTTP.Paths {
@@ -177,7 +211,6 @@ func (g *Graph) generate() {
 			}
 		}
 	}
-
 }
 
 func (g *Graph) imagePath(resource string) string {
