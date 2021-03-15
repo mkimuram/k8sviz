@@ -17,6 +17,8 @@ import (
 )
 
 var (
+	// ResourceTypes represents the set of resource types.
+	// Resouces are grouped by the same level of abstraction.
 	ResourceTypes   = []string{"deploy job", "sts ds rs", "pod", "pvc", "svc", "ing"}
 	normalizedNames = map[string]string{
 		"ns":     "namespace",
@@ -32,6 +34,7 @@ var (
 	}
 )
 
+// Resources represents the k8s resources
 type Resources struct {
 	clientset *kubernetes.Clientset
 	Namespace string
@@ -47,6 +50,7 @@ type Resources struct {
 	Ingresses *v1beta1.IngressList
 }
 
+// NewResources resturns Resources for the namespace
 func NewResources(clientset *kubernetes.Clientset, namespace string) *Resources {
 	var err error
 	res := &Resources{clientset: clientset, Namespace: namespace}
@@ -108,6 +112,7 @@ func NewResources(clientset *kubernetes.Clientset, namespace string) *Resources 
 	return res
 }
 
+// GetResourceNames returns the resource names of the kind
 func (r *Resources) GetResourceNames(kind string) []string {
 	names := []string{}
 
@@ -153,6 +158,7 @@ func (r *Resources) GetResourceNames(kind string) []string {
 	return names
 }
 
+// HasResource check if Resources has k8s resource with the kind and the name
 func (r *Resources) HasResource(kind, name string) bool {
 	for _, resName := range r.GetResourceNames(kind) {
 		if resName == name {
@@ -162,6 +168,9 @@ func (r *Resources) HasResource(kind, name string) bool {
 	return false
 }
 
+// NormalizeResource resturns normalized name of the resource.
+// It returns error if it fails to normalize the resource name.
+// key of normalizedNames map is used as the normalized name.
 func NormalizeResource(resource string) (string, error) {
 	for k, v := range normalizedNames {
 		if k == strings.ToLower(resource) {
