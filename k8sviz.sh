@@ -81,6 +81,10 @@ if [ ! -f "${KUBECONFIG}" ];then
   exit 1
 fi
 
-docker run --network host -v ${ABSDIR}:/work -v ${KUBECONFIG}:/config:ro \
-  -e KUBECONFIG=/config -it ${CONTAINER_IMG} /k8sviz -kubeconfig /config \
+docker run --network host                        \
+  --user $(id -u):$(id -g)                       \
+  -v ${ABSDIR}:/work                             \
+  -v ${KUBECONFIG}:/config:ro                    \
+  -it --rm ${CONTAINER_IMG}                      \
+  /k8sviz -kubeconfig /config                    \
   -n ${NAMESPACE} -t ${TYPE} -o /work/${FILENAME}
