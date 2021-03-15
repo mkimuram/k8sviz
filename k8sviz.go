@@ -13,6 +13,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -36,7 +37,7 @@ const (
 var (
 	clientset       *kubernetes.Clientset
 	dir             string
-	resourceTypes   = []string{"deploy job", "sts ds rs", "pod", "pvc", "svc"}
+	resourceTypes   = []string{"deploy job", "sts ds rs", "pod", "pvc", "svc", "ing"}
 	normalizedNames = map[string]string{
 		"ns":     "namespace",
 		"svc":    "service",
@@ -47,6 +48,7 @@ var (
 		"rs":     "replicaset",
 		"deploy": "deployment",
 		"job":    "job",
+		"ing":    "ingress",
 	}
 
 	// Flags
@@ -65,6 +67,7 @@ type resources struct {
 	rss       *appsv1.ReplicaSetList
 	deploys   *appsv1.DeploymentList
 	jobs      *batchv1.JobList
+	ingresses *v1beta1.IngressList
 }
 
 func newResources(clientset *kubernetes.Clientset, namespace string) *resources {
@@ -119,6 +122,12 @@ func newResources(clientset *kubernetes.Clientset, namespace string) *resources 
 		fmt.Fprintf(os.Stderr, "Failed to get jobs in namespace %q: %v\n", namespace, err)
 	}
 
+	// ingress
+	res.ingresses, err = clientset.ExtensionsV1beta1().Ingresses(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to get ingresses in namespace %q: %v\n", namespace, err)
+	}
+
 	return res
 }
 
@@ -156,6 +165,10 @@ func (r *resources) getResourceNames(kind string) []string {
 		}
 	case "job":
 		for _, n := range r.jobs.Items {
+			names = append(names, n.Name)
+		}
+	case "ing":
+		for _, n := range r.ingresses.Items {
 			names = append(names, n.Name)
 		}
 	}
@@ -362,10 +375,23 @@ func toDot(namespace string) string {
 					break
 				}
 			}
-
 			if matched {
 				graph.AddEdge(toResourceName("pod", pod.Name), toResourceName("svc", svc.Name), true,
 					map[string]string{"dir": "back"})
+			}
+		}
+	}
+
+	// ingress and svc
+	for _, ing := range res.ingresses.Items {
+		for _, rule := range ing.Spec.Rules {
+			for _, path := range rule.IngressRuleValue.HTTP.Paths {
+				if !res.hasResource("svc", path.Backend.ServiceName) {
+					fmt.Fprintf(os.Stderr, "svc %s not found for ingress %s\n", path.Backend.ServiceName, ing.Name)
+					continue
+				}
+
+				graph.AddEdge(toResourceName("svc", path.Backend.ServiceName), toResourceName("ing", ing.Name), true, map[string]string{"dir": "back"})
 			}
 		}
 	}
