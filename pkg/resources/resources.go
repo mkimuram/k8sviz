@@ -5,7 +5,6 @@ package resources
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -51,65 +50,65 @@ type Resources struct {
 }
 
 // NewResources resturns Resources for the namespace
-func NewResources(clientset *kubernetes.Clientset, namespace string) *Resources {
+func NewResources(clientset *kubernetes.Clientset, namespace string) (*Resources, error) {
 	var err error
 	res := &Resources{clientset: clientset, Namespace: namespace}
 
 	// service
 	res.Svcs, err = clientset.CoreV1().Services(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get services in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get services in namespace %q: %v", namespace, err)
 	}
 
 	// persistentvolumeclaim
 	res.Pvcs, err = clientset.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get persistentVolumeClaims in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get persistentVolumeClaims in namespace %q: %v", namespace, err)
 	}
 
 	// pod
 	res.Pods, err = clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get pods in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get pods in namespace %q: %v", namespace, err)
 	}
 
 	// statefulset
 	res.Stss, err = clientset.AppsV1().StatefulSets(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get statefulsets in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get statefulsets in namespace %q: %v", namespace, err)
 	}
 
 	// daemonset
 	res.Dss, err = clientset.AppsV1().DaemonSets(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get daemonsets in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get daemonsets in namespace %q: %v", namespace, err)
 	}
 
 	// replicaset
 	res.Rss, err = clientset.AppsV1().ReplicaSets(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get replicasets in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get replicasets in namespace %q: %v", namespace, err)
 	}
 
 	// deployment
 	res.Deploys, err = clientset.AppsV1().Deployments(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get deployments in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get deployments in namespace %q: %v", namespace, err)
 	}
 
 	// job
 	res.Jobs, err = clientset.BatchV1().Jobs(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get jobs in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get jobs in namespace %q: %v", namespace, err)
 	}
 
 	// ingress
 	res.Ingresses, err = clientset.ExtensionsV1beta1().Ingresses(namespace).List(metav1.ListOptions{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get ingresses in namespace %q: %v\n", namespace, err)
+		return nil, fmt.Errorf("failed to get ingresses in namespace %q: %v", namespace, err)
 	}
 
-	return res
+	return res, nil
 }
 
 // GetResourceNames returns the resource names of the kind
