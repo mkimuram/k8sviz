@@ -85,7 +85,12 @@ func init() {
 
 func main() {
 	// Get all resources in the namespace
-	res := resources.NewResources(clientset, namespace)
+	res, err := resources.NewResources(clientset, namespace)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to get k8s resources: %v\n", err)
+		os.Exit(1)
+	}
+
 	g := graph.NewGraph(res, dir)
 
 	if outType == "dot" {
