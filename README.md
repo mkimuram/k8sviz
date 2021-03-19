@@ -36,16 +36,14 @@ k8sviz binary can be moved to another directory, but `icons` directory needs to 
 ### Bash script version
 ```
 $ ./k8sviz.sh --help
-Generate Kubernetes architecture diagrams from the actual state in a namespace
-Usage:
-  k8sviz.sh [options]
-Options:
-  -h, --help                 Displays the help text
-  -n, --namespace            The namespace to visualize. Default is default
-  -o, --outfile              The filename to output. Default is k8sviz.out
-  -t, --type                 The type of output. Default is dot
-  -k, --kubeconfig           Path to kubeconfig file. Default is ~/kubeconfig
-  -i, --image                Image name of the container. Default is mkimuram/k8sviz:0.2
+USAGE: ./k8sviz.sh [flags] args
+flags:
+  -n,--namespace:  The namespace to visualize. (default: 'default')
+  -o,--outfile:  The filename to output. (default: 'k8sviz.out')
+  -t,--type:  The type of output. (default: 'dot')
+  -k,--kubeconfig:  Path to kubeconfig file. (default: '/home/user1/kubeconfig')
+  -i,--image:  Image name of the container. (default: 'mkimuram/k8sviz:0.3')
+  -h,--help:  show this help (default: false)
 ```
 
 ### Go version
@@ -53,7 +51,7 @@ Options:
 $ ./k8sviz -h
 Usage of ./k8sviz:
   -kubeconfig string
-        absolute path to the kubeconfig file (default "/root/.kube/config")
+        absolute path to the kubeconfig file (default "/home/user1/.kube/config")
   -n string
         namespace to visualize (shorthand) (default "namespace")
   -namespace string
