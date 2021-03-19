@@ -1,77 +1,60 @@
 #! /bin/bash
 
 #### Variables ####
-NAME=$(basename $0 | tr - ' ')
 NAMESPACE="default"
 OUTFILE="k8sviz.out"
 TYPE="dot"
 KUBECONFIG=~/kubeconfig
-CONTAINER_IMG=mkimuram/k8sviz:0.2
+CONTAINER_IMG=mkimuram/k8sviz:0.3
+SHFLAGS_DIR="$(dirname ${BASH_SOURCE})/lib/"
+SHFLAGS_PATH="${SHFLAGS_DIR}shflags"
+SHFLAGS_URL="https://raw.githubusercontent.com/kward/shflags/master/shflags"
 
-#### Functions ####
-function help () {
-  cat << EOF
-Generate Kubernetes architecture diagrams from the actual state in a namespace
-Usage:
-  $NAME [options]
-Options:
-  -h, --help                 Displays the help text
-  -n, --namespace            The namespace to visualize. Default is ${NAMESPACE}
-  -o, --outfile              The filename to output. Default is ${OUTFILE}
-  -t, --type                 The type of output. Default is ${TYPE}
-  -k, --kubeconfig           Path to kubeconfig file. Default is ${KUBECONFIG}
-  -i, --image                Image name of the container. Default is ${CONTAINER_IMG}
+if [ ! -f ${SHFLAGS_PATH} ];then
+	echo "${SHFLAGS_PATH} not found. Downloading." >&2
+
+	mkdir -p ${SHFLAGS_DIR}
+	if [ $? -ne 0 ];then
+		cat << EOF >&2
+Failed to create ${SHFLAGS_DIR} directory.
+Move this script to the directory where you have write permission.
 EOF
-}
+		exit 1
+	fi
+
+	curl -L -f -o ${SHFLAGS_PATH} ${SHFLAGS_URL}
+	if [ $? -ne 0 ];then
+		cat << EOF >&2
+Failed to download shflags.
+You can manually download it from ${SHFLAGS_URL}
+and copy it to ${SHFLAGS_DIR} to fix it.
+EOF
+		exit 1
+	fi
+fi
+
+. ${SHFLAGS_PATH}
+
+DEFINE_string 'namespace' "${NAMESPACE}" 'The namespace to visualize.' 'n'
+DEFINE_string 'outfile' "${OUTFILE}" 'The filename to output.' 'o'
+DEFINE_string 'type' "${TYPE}" 'The type of output.' 't'
+DEFINE_string 'kubeconfig' "${KUBECONFIG}" 'Path to kubeconfig file.' 'k'
+DEFINE_string 'image' "${CONTAINER_IMG}" 'Image name of the container.' 'i'
+
+# Parse Options
+FLAGS "$@" || exit $?
+eval set -- "${FLAGS_ARGV}"
 
 #### Main ####
-# Parse Options
-OPTS=$(getopt --options hn:o:t:k:i: --longoptions help,namespace:,outfile:,type:,kubeconfig:,image: --name "$NAME" -- "$@")
-[[ $? != 0 ]] && echo "Failed parsing options" >&2 && exit 1
-eval set -- "$OPTS"
-
-while true;do
-  case "$1" in
-    -h | --help)
-      help
-      exit 0
-      ;;
-    -n | --namespace)
-      NAMESPACE="${2:-$NAMESPACE}"
-      shift 2
-      ;;
-    -o | --outfile)
-      OUTFILE="${2:-$OUTFILE}"
-      shift 2
-      ;;
-    -t | --type)
-      TYPE="${2:-$TYPE}"
-      shift 2
-      ;;
-    -k | --kubeconfig)
-      KUBECONFIG="${2:-$KUBECONFIG}"
-      shift 2
-      ;;
-    -i | --image)
-      CONTAINER_IMG="${2:-$CONTAINER_IMG}"
-      shift 2
-      ;;
-    --)
-      shift
-      break
-      ;;
-  esac
-done
-
 # Split OUTFILE to the directory and the filename to be used with container
-DIR=$(dirname ${OUTFILE})
+DIR=$(dirname ${FLAGS_outfile})
 ABSDIR=$(cd ${DIR}; pwd -P)
-FILENAME=$(basename ${OUTFILE})
+FILENAME=$(basename ${FLAGS_outfile})
 
 # Make KUBECONFIG to absolute path
-KUBEDIR=$(dirname ${KUBECONFIG})
+KUBEDIR=$(dirname ${FLAGS_kubeconfig})
 ABSKUBEDIR=$(cd ${KUBEDIR}; pwd -P)
-KUBEFILE=$(basename ${KUBECONFIG})
+KUBEFILE=$(basename ${FLAGS_kubeconfig})
 KUBECONFIG="${ABSKUBEDIR}/${KUBEFILE}"
 
 # Check if KUBECONFIG file exists
@@ -81,10 +64,10 @@ if [ ! -f "${KUBECONFIG}" ];then
   exit 1
 fi
 
-docker run --network host                        \
-  --user $(id -u):$(id -g)                       \
-  -v ${ABSDIR}:/work                             \
-  -v ${KUBECONFIG}:/config:ro                    \
-  -it --rm ${CONTAINER_IMG}                      \
-  /k8sviz -kubeconfig /config                    \
-  -n ${NAMESPACE} -t ${TYPE} -o /work/${FILENAME}
+docker run --network host                                    \
+  --user $(id -u):$(id -g)                                   \
+  -v ${ABSDIR}:/work                                         \
+  -v ${KUBECONFIG}:/config:ro                                \
+  -it --rm ${FLAGS_image}                                    \
+  /k8sviz -kubeconfig /config                                \
+  -n ${FLAGS_namespace} -t ${FLAGS_type} -o /work/${FILENAME}
