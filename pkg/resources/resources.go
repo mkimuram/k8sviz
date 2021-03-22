@@ -35,7 +35,7 @@ var (
 
 // Resources represents the k8s resources
 type Resources struct {
-	clientset *kubernetes.Clientset
+	clientset kubernetes.Interface
 	Namespace string
 
 	Svcs      *corev1.ServiceList
@@ -50,7 +50,7 @@ type Resources struct {
 }
 
 // NewResources resturns Resources for the namespace
-func NewResources(clientset *kubernetes.Clientset, namespace string) (*Resources, error) {
+func NewResources(clientset kubernetes.Interface, namespace string) (*Resources, error) {
 	var err error
 	res := &Resources{clientset: clientset, Namespace: namespace}
 
