@@ -1,0 +1,74 @@
+digraph G {
+	rankdir=TD;
+	0->1[ style=invis ];
+	1->2[ style=invis ];
+	2->3[ style=invis ];
+	3->4[ style=invis ];
+	4->5[ style=invis ];
+	ds_ds1->pod_ds1_pod1[ style=dashed ];
+	ds_ds1->pod_ds1_pod2[ style=dashed ];
+	job_job1->pod_job1_pod1[ style=dashed ];
+	0->1[ style=invis ];
+	1->2[ style=invis ];
+	2->3[ style=invis ];
+	3->4[ style=invis ];
+	4->5[ style=invis ];
+	ds_ds1->pod_ds1_pod1[ style=dashed ];
+	ds_ds1->pod_ds1_pod2[ style=dashed ];
+	job_job1->pod_job1_pod1[ style=dashed ];
+	subgraph cluster_testns {
+	label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/ns-128.png" /></TD></TR><TR><TD>testns</TD></TR></TABLE>>;
+	labeljust=l;
+	style=dotted;
+	subgraph rank_0 {
+	rank=same;
+	style=invis;
+	0 [ height=0, margin=0, style=invis, width=0 ];
+	job_job1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/job-128.png" /></TD></TR><TR><TD>job1</TD></TR></TABLE>>, penwidth=0 ];
+
+}
+;
+	subgraph rank_1 {
+	rank=same;
+	style=invis;
+	1 [ height=0, margin=0, style=invis, width=0 ];
+	ds_ds1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/ds-128.png" /></TD></TR><TR><TD>ds1</TD></TR></TABLE>>, penwidth=0 ];
+
+}
+;
+	subgraph rank_2 {
+	rank=same;
+	style=invis;
+	2 [ height=0, margin=0, style=invis, width=0 ];
+	pod_ds1_pod1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>ds1-pod1</TD></TR></TABLE>>, penwidth=0 ];
+	pod_ds1_pod2 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>ds1-pod2</TD></TR></TABLE>>, penwidth=0 ];
+	pod_job1_pod1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>job1-pod1</TD></TR></TABLE>>, penwidth=0 ];
+
+}
+;
+	subgraph rank_3 {
+	rank=same;
+	style=invis;
+	3 [ height=0, margin=0, style=invis, width=0 ];
+
+}
+;
+	subgraph rank_4 {
+	rank=same;
+	style=invis;
+	4 [ height=0, margin=0, style=invis, width=0 ];
+
+}
+;
+	subgraph rank_5 {
+	rank=same;
+	style=invis;
+	5 [ height=0, margin=0, style=invis, width=0 ];
+
+}
+;
+
+}
+;
+
+}
