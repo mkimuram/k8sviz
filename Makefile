@@ -3,7 +3,7 @@ TAG ?= 0.3
 DEVEL_IMAGE ?= k8sviz
 DEVEL_TAG ?= devel
 
-test: test-lint test-fmt
+test: test-lint test-fmt test-unit
 	@echo "[Running test]"
 
 test-lint:
@@ -16,6 +16,10 @@ test-fmt:
 		gofmt -d cmd/ pkg/ ;\
 		false; \
 	fi
+
+test-unit:
+	@echo "[Running unit tests]"
+	go test -cover `go list ./...`
 
 build:
 	@echo "[Build]"
@@ -33,4 +37,4 @@ image-push: image-build
 	docker tag $(DEVEL_IMAGE):$(DEVEL_TAG) $(IMAGE):$(TAG)
 	docker push $(IMAGE):$(TAG)
 
-.PHONY: test test-lint test-fmt build release image-build image-push
+.PHONY: test test-lint test-fmt test-unit build release image-build image-push
