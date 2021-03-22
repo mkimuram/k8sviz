@@ -95,12 +95,12 @@ func main() {
 
 	if outType == "dot" {
 		if err := g.WriteDotFile(outFile); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to output dot file for namespace %q: %v\n", namespace, err)
+			fmt.Fprintf(os.Stderr, "Failed to output %q file with format %q for namespace %q: %v\n", outFile, outType, namespace, err)
 			os.Exit(1)
 		}
 	} else {
 		if err := g.PlotDotFile(outFile, outType); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to output %s file for namespace %q: %v\n", outType, namespace, err)
+			fmt.Fprintf(os.Stderr, "Failed to output %q file with format %q for namespace %q: %v\n", outFile, outType, namespace, err)
 			os.Exit(1)
 		}
 	}
