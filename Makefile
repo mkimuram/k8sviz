@@ -28,7 +28,7 @@ test-unit:
 
 test-e2e:
 	@echo "[Running e2e tests]"
-	go test -v `go list ./test/e2e/...` -args -ginkgo.v
+	./test/e2e/e2e.sh
 
 build:
 	@echo "[Build]"
