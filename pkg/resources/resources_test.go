@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
+	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -30,6 +31,7 @@ var (
 		&appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "deploy1"}},
 		&batchv1.Job{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "job1"}},
 		&v1beta1.Ingress{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ing1"}},
+		&autov1.HorizontalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "hpa1"}},
 	}
 )
 
@@ -105,6 +107,12 @@ func TestGetResourceNames(t *testing.T) {
 			resources: testRes1,
 			kind:      "ing",
 			expected:  []string{"ing1"},
+		},
+		{
+			name:      "hpa1 in testns and kind:hpa is specified",
+			resources: testRes1,
+			kind:      "hpa",
+			expected:  []string{"hpa1"},
 		},
 	}
 
@@ -239,6 +247,13 @@ func TestHasResource(t *testing.T) {
 			resources:    testRes1,
 			kind:         "ing",
 			resourceName: "ing1",
+			expected:     true,
+		},
+		{
+			name:         "hpa1 in testns and kind:hpa is specified",
+			resources:    testRes1,
+			kind:         "hpa",
+			resourceName: "hpa1",
 			expected:     true,
 		},
 	}
@@ -396,6 +411,18 @@ func TestNormalizeResource(t *testing.T) {
 			name:      "Should return ing for ing",
 			kind:      "ing",
 			expected:  "ing",
+			expectErr: false,
+		},
+		{
+			name:      "Should return hpa for hpa",
+			kind:      "hpa",
+			expected:  "hpa",
+			expectErr: false,
+		},
+		{
+			name:      "Should return hpa for HorizontalPodAutoscaler",
+			kind:      "HorizontalPodAutoscaler",
+			expected:  "hpa",
 			expectErr: false,
 		},
 	}
