@@ -4,6 +4,7 @@
 package graph
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -34,26 +35,62 @@ func (g *Graph) WriteDotFile(outFile string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
 	if _, err := f.WriteString(g.toDot()); err != nil {
+		if closeErr := f.Close(); closeErr != nil {
+			return fmt.Errorf("failed to close file after write failure: %v, %v", closeErr, err)
+		}
 		return err
 	}
 
-	return nil
+	return f.Close()
 }
 
 // PlotDotFile plots the graph to outFile with outType format
 func (g *Graph) PlotDotFile(outFile, outType string) error {
-	cmd := exec.Command("dot", "-T"+outType, "-o", outFile)
+	var cmd *exec.Cmd
+
+	// To avoid CWE-78, passing static argument to exec.Command
+	switch outType {
+	case "ps":
+		cmd = exec.Command("dot", "-Tps")
+	case "pdf":
+		cmd = exec.Command("dot", "-Tpdf")
+	case "svg":
+		cmd = exec.Command("dot", "-Tsvg")
+	case "png":
+		cmd = exec.Command("dot", "-Tpng")
+	case "gif":
+		cmd = exec.Command("dot", "-Tgif")
+	case "jpg":
+		cmd = exec.Command("dot", "-Tjpg")
+	default:
+		return fmt.Errorf("format %q is not supported", outType)
+	}
+
+	// Call dot command
+	var stdout, stderr bytes.Buffer
 	cmd.Stdin = strings.NewReader(g.toDot())
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to create dot file: stderr: %v, err: %v", stderr.String(), err)
+	}
+
+	// Write to outFile
+	f, err := os.Create(outFile)
+	if err != nil {
 		return err
 	}
 
-	return nil
+	if _, err := f.WriteString(stdout.String()); err != nil {
+		if closeErr := f.Close(); closeErr != nil {
+			return fmt.Errorf("failed to close file after write failure: %v, %v", closeErr, err)
+		}
+		return err
+	}
+
+	return f.Close()
 }
 
 // toDot returns a string representation of the graph with dot format
@@ -83,11 +120,23 @@ func (g *Graph) generateCommon() {
 	//   labeljust=l;
 	//   style=dotted;
 	// ```
-	g.gviz.SetDir(true)
-	g.gviz.SetName("G")
-	g.gviz.AddAttr("G", "rankdir", "TD")
-	g.gviz.AddSubGraph("G", g.clusterName(),
+	err := g.gviz.SetDir(true)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to set to digraph: %v\n", err)
+	}
+	err = g.gviz.SetName("G")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to set to graph name to G: %v\n", err)
+	}
+	err = g.gviz.AddAttr("G", "rankdir", "TD")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to set rankdir to TD: %v\n", err)
+	}
+	err = g.gviz.AddSubGraph("G", g.clusterName(),
 		map[string]string{"label": g.clusterLabel(), "labeljust": "l", "style": "dotted"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to add subgraph %s to digraph G: %v\n", g.clusterName(), err)
+	}
 
 	// Create subgraphs for resources to group by rank (repeats #ResourceTypes)
 	// ```
@@ -106,11 +155,18 @@ func (g *Graph) generateCommon() {
 	// ;
 	// ```
 	for r := 0; r < len(resources.ResourceTypes); r++ {
-		g.gviz.AddSubGraph(g.clusterName(), g.rankName(r),
+		err = g.gviz.AddSubGraph(g.clusterName(), g.rankName(r),
 			map[string]string{"rank": "same", "style": "invis"})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to add subgraph %s to subgraph %s: %v\n", g.rankName(r), g.clusterName(), err)
+		}
+
 		// Put dummy invisible node to order ranks
-		g.gviz.AddNode(g.rankName(r), g.rankDummyNodeName(r),
+		err = g.gviz.AddNode(g.rankName(r), g.rankDummyNodeName(r),
 			map[string]string{"style": "invis", "height": "0", "width": "0", "margin": "0"})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to add node %s to subgraph %s: %v\n", g.rankDummyNodeName(r), g.rankName(r), err)
+		}
 	}
 
 	// Order ranks (repeats #ResourceTypes)
@@ -121,8 +177,11 @@ func (g *Graph) generateCommon() {
 	// ```
 	for r := 0; r < len(resources.ResourceTypes)-1; r++ {
 		// Connect rth node and r+1th dummy node with invisible edge
-		g.gviz.AddEdge(g.rankDummyNodeName(r), g.rankDummyNodeName(r+1), true,
+		err = g.gviz.AddEdge(g.rankDummyNodeName(r), g.rankDummyNodeName(r+1), true,
 			map[string]string{"style": "invis"})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.rankDummyNodeName(r), g.rankDummyNodeName(r+1), err)
+		}
 	}
 }
 
@@ -138,8 +197,11 @@ func (g *Graph) generateNodes() {
 	for r, rankRes := range resources.ResourceTypes {
 		for _, resType := range strings.Fields(rankRes) {
 			for _, name := range g.res.GetResourceNames(resType) {
-				g.gviz.AddNode(g.rankName(r), g.resourceName(resType, name),
+				err := g.gviz.AddNode(g.rankName(r), g.resourceName(resType, name),
 					map[string]string{"label": g.resourceLabel(resType, name), "penwidth": "0"})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Failed to add node %s to subgraph %s: %v\n", g.resourceName(resType, name), g.rankName(r), err)
+				}
 			}
 		}
 	}
@@ -185,8 +247,11 @@ func (g *Graph) genPodOwnerRef() {
 				fmt.Fprintf(os.Stderr, "%s %s not found as a owner refernce for po %s\n", ownerKind, ref.Name, pod.Name)
 				continue
 			}
-			g.gviz.AddEdge(g.resourceName(ownerKind, ref.Name), g.resourceName("pod", pod.Name), true,
+			err = g.gviz.AddEdge(g.resourceName(ownerKind, ref.Name), g.resourceName("pod", pod.Name), true,
 				map[string]string{"style": "dashed"})
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName(ownerKind, ref.Name), g.resourceName("pod", pod.Name), err)
+			}
 		}
 	}
 }
@@ -213,8 +278,11 @@ func (g *Graph) genRsOwnerRef() {
 				continue
 			}
 
-			g.gviz.AddEdge(g.resourceName(ownerKind, ref.Name), g.resourceName("rs", rs.Name), true,
+			err = g.gviz.AddEdge(g.resourceName(ownerKind, ref.Name), g.resourceName("rs", rs.Name), true,
 				map[string]string{"style": "dashed"})
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName(ownerKind, ref.Name), g.resourceName("rs", rs.Name), err)
+			}
 		}
 	}
 }
@@ -235,8 +303,11 @@ func (g *Graph) genPvcPodRef() {
 					continue
 				}
 
-				g.gviz.AddEdge(g.resourceName("pod", pod.Name), g.resourceName("pvc", vol.VolumeSource.PersistentVolumeClaim.ClaimName), true,
-					map[string]string{"dir": "none"})
+				err := g.gviz.AddEdge(g.resourceName("pod", pod.Name), g.resourceName("pvc", vol.VolumeSource.PersistentVolumeClaim.ClaimName), true, map[string]string{"dir": "none"})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName("pod", pod.Name), g.resourceName("pvc", vol.VolumeSource.PersistentVolumeClaim.ClaimName), err)
+				}
+
 			}
 		}
 	}
@@ -267,8 +338,10 @@ func (g *Graph) genSvcPodRef() {
 			}
 
 			if matched {
-				g.gviz.AddEdge(g.resourceName("pod", pod.Name), g.resourceName("svc", svc.Name), true,
-					map[string]string{"dir": "back"})
+				err := g.gviz.AddEdge(g.resourceName("pod", pod.Name), g.resourceName("svc", svc.Name), true, map[string]string{"dir": "back"})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName("pod", pod.Name), g.resourceName("svc", svc.Name), err)
+				}
 			}
 		}
 	}
@@ -290,7 +363,10 @@ func (g *Graph) genIngSvcRef() {
 					continue
 				}
 
-				g.gviz.AddEdge(g.resourceName("svc", path.Backend.ServiceName), g.resourceName("ing", ing.Name), true, map[string]string{"dir": "back"})
+				err := g.gviz.AddEdge(g.resourceName("svc", path.Backend.ServiceName), g.resourceName("ing", ing.Name), true, map[string]string{"dir": "back"})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName("svc", path.Backend.ServiceName), g.resourceName("ing", ing.Name), err)
+				}
 			}
 		}
 	}

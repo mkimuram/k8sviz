@@ -179,5 +179,5 @@ func NormalizeResource(resource string) (string, error) {
 			return k, nil
 		}
 	}
-	return "", fmt.Errorf("Failed to find normalized resource name for %s", resource)
+	return "", fmt.Errorf("failed to find normalized resource name for %s", resource)
 }
