@@ -5,10 +5,12 @@ digraph G {
 	2->3[ style=invis ];
 	3->4[ style=invis ];
 	4->5[ style=invis ];
+	5->6[ style=invis ];
 	rs_rs1->pod_rs1_pod1[ style=dashed ];
 	rs_rs1->pod_rs1_pod2[ style=dashed ];
 	rs_rs1->pod_rs1_pod3[ style=dashed ];
 	deploy_deploy1->rs_rs1[ style=dashed ];
+	hpa_hpa1->deploy_deploy1[ style=dashed ];
 	pod_rs1_pod1->svc_svc1[ dir=back ];
 	pod_rs1_pod2->svc_svc1[ dir=back ];
 	pod_rs1_pod3->svc_svc1[ dir=back ];
@@ -18,10 +20,12 @@ digraph G {
 	2->3[ style=invis ];
 	3->4[ style=invis ];
 	4->5[ style=invis ];
+	5->6[ style=invis ];
 	rs_rs1->pod_rs1_pod1[ style=dashed ];
 	rs_rs1->pod_rs1_pod2[ style=dashed ];
 	rs_rs1->pod_rs1_pod3[ style=dashed ];
 	deploy_deploy1->rs_rs1[ style=dashed ];
+	hpa_hpa1->deploy_deploy1[ style=dashed ];
 	pod_rs1_pod1->svc_svc1[ dir=back ];
 	pod_rs1_pod2->svc_svc1[ dir=back ];
 	pod_rs1_pod3->svc_svc1[ dir=back ];
@@ -34,7 +38,7 @@ digraph G {
 	rank=same;
 	style=invis;
 	0 [ height=0, margin=0, style=invis, width=0 ];
-	deploy_deploy1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/deploy-128.png" /></TD></TR><TR><TD>deploy1</TD></TR></TABLE>>, penwidth=0 ];
+	hpa_hpa1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/hpa-128.png" /></TD></TR><TR><TD>hpa1</TD></TR></TABLE>>, penwidth=0 ];
 
 }
 ;
@@ -42,7 +46,7 @@ digraph G {
 	rank=same;
 	style=invis;
 	1 [ height=0, margin=0, style=invis, width=0 ];
-	rs_rs1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/rs-128.png" /></TD></TR><TR><TD>rs1</TD></TR></TABLE>>, penwidth=0 ];
+	deploy_deploy1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/deploy-128.png" /></TD></TR><TR><TD>deploy1</TD></TR></TABLE>>, penwidth=0 ];
 
 }
 ;
@@ -50,9 +54,7 @@ digraph G {
 	rank=same;
 	style=invis;
 	2 [ height=0, margin=0, style=invis, width=0 ];
-	pod_rs1_pod1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>rs1-pod1</TD></TR></TABLE>>, penwidth=0 ];
-	pod_rs1_pod2 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>rs1-pod2</TD></TR></TABLE>>, penwidth=0 ];
-	pod_rs1_pod3 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>rs1-pod3</TD></TR></TABLE>>, penwidth=0 ];
+	rs_rs1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/rs-128.png" /></TD></TR><TR><TD>rs1</TD></TR></TABLE>>, penwidth=0 ];
 
 }
 ;
@@ -60,6 +62,9 @@ digraph G {
 	rank=same;
 	style=invis;
 	3 [ height=0, margin=0, style=invis, width=0 ];
+	pod_rs1_pod1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>rs1-pod1</TD></TR></TABLE>>, penwidth=0 ];
+	pod_rs1_pod2 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>rs1-pod2</TD></TR></TABLE>>, penwidth=0 ];
+	pod_rs1_pod3 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/pod-128.png" /></TD></TR><TR><TD>rs1-pod3</TD></TR></TABLE>>, penwidth=0 ];
 
 }
 ;
@@ -67,7 +72,6 @@ digraph G {
 	rank=same;
 	style=invis;
 	4 [ height=0, margin=0, style=invis, width=0 ];
-	svc_svc1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/svc-128.png" /></TD></TR><TR><TD>svc1</TD></TR></TABLE>>, penwidth=0 ];
 
 }
 ;
@@ -75,6 +79,14 @@ digraph G {
 	rank=same;
 	style=invis;
 	5 [ height=0, margin=0, style=invis, width=0 ];
+	svc_svc1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/svc-128.png" /></TD></TR><TR><TD>svc1</TD></TR></TABLE>>, penwidth=0 ];
+
+}
+;
+	subgraph rank_6 {
+	rank=same;
+	style=invis;
+	6 [ height=0, margin=0, style=invis, width=0 ];
 	ing_ing1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/ing-128.png" /></TD></TR><TR><TD>ing1</TD></TR></TABLE>>, penwidth=0 ];
 
 }

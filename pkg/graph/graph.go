@@ -12,6 +12,7 @@ import (
 
 	"github.com/awalterschulze/gographviz"
 	"github.com/mkimuram/k8sviz/pkg/resources"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Graph represents a graph of k8s resources
@@ -216,6 +217,9 @@ func (g *Graph) generateEdges() {
 	// Owner reference for rs
 	g.genRsOwnerRef()
 
+	// hpa to scale target
+	g.genHpaScaleTargetRef()
+
 	// pvc and pod
 	g.genPvcPodRef()
 
@@ -237,22 +241,7 @@ func (g *Graph) genPodOwnerRef() {
 	// rs_my_replicaset->pod_my_pod [ style=dashed ];
 	// ```
 	for _, pod := range g.res.Pods.Items {
-		for _, ref := range pod.GetOwnerReferences() {
-			ownerKind, err := resources.NormalizeResource(ref.Kind)
-			if err != nil {
-				// Skip resource that isn't available for this tool, like CRD
-				continue
-			}
-			if !g.res.HasResource(ownerKind, ref.Name) {
-				fmt.Fprintf(os.Stderr, "%s %s not found as a owner refernce for po %s\n", ownerKind, ref.Name, pod.Name)
-				continue
-			}
-			err = g.gviz.AddEdge(g.resourceName(ownerKind, ref.Name), g.resourceName("pod", pod.Name), true,
-				map[string]string{"style": "dashed"})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName(ownerKind, ref.Name), g.resourceName("pod", pod.Name), err)
-			}
-		}
+		g.genOwnerRef("pod", &pod)
 	}
 }
 
@@ -267,22 +256,56 @@ func (g *Graph) genRsOwnerRef() {
 	// deploy_my_deployment->rs_my_replicaset[ style=dashed ];
 	// ```
 	for _, rs := range g.res.Rss.Items {
-		for _, ref := range rs.GetOwnerReferences() {
-			ownerKind, err := resources.NormalizeResource(ref.Kind)
-			if err != nil {
-				// Skip resource that isn't available for this tool, like CRD
-				continue
-			}
-			if !g.res.HasResource(ownerKind, ref.Name) {
-				fmt.Fprintf(os.Stderr, "%s %s not found as a owner refernce for rs %s\n", ownerKind, ref.Name, rs.Name)
-				continue
-			}
+		g.genOwnerRef("rs", &rs)
+	}
+}
 
-			err = g.gviz.AddEdge(g.resourceName(ownerKind, ref.Name), g.resourceName("rs", rs.Name), true,
-				map[string]string{"style": "dashed"})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName(ownerKind, ref.Name), g.resourceName("rs", rs.Name), err)
-			}
+// genOwnerRef generates the edges of OwnerReferences for specified obj
+func (g *Graph) genOwnerRef(kind string, obj metav1.Object) {
+	for _, ref := range obj.GetOwnerReferences() {
+		ownerKind, err := resources.NormalizeResource(ref.Kind)
+		if err != nil {
+			// Skip resource that isn't available for this tool, like CRD
+			continue
+		}
+		if !g.res.HasResource(ownerKind, ref.Name) {
+			fmt.Fprintf(os.Stderr, "%s %s not found as a owner refernce for rs %s\n", ownerKind, ref.Name, obj.GetName())
+			continue
+		}
+
+		err = g.gviz.AddEdge(g.resourceName(ownerKind, ref.Name), g.resourceName(kind, obj.GetName()), true,
+			map[string]string{"style": "dashed"})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName(ownerKind, ref.Name), g.resourceName(kind, obj.GetName()), err)
+		}
+	}
+}
+
+// genHpaScaleTargetRef generates the edges of HPA to deploy reference
+func (g *Graph) genHpaScaleTargetRef() {
+	// Add edge if below matches:
+	//   - k8s.io/api/autoscaling/v1.HorizontalPodAutoscaler.Spec.ScaleTargetRef.
+	//     - kind
+	//     - name
+	//   - {kind}.metadata.{name}
+	// ```
+	// hpa_my_hpa->deploy_my_deploy[ style=dashed ];
+	// ```
+	for _, hpa := range g.res.Hpas.Items {
+		target := hpa.Spec.ScaleTargetRef
+		targetKind, err := resources.NormalizeResource(target.Kind)
+		if err != nil {
+			// Skip resource that isn't available for this tool, like CRD
+			continue
+		}
+		if !g.res.HasResource(targetKind, target.Name) {
+			fmt.Fprintf(os.Stderr, "%s %q is referenced from %q, but not found\n", targetKind, target.Name, hpa.Name)
+			continue
+		}
+
+		err = g.gviz.AddEdge(g.resourceName("hpa", hpa.Name), g.resourceName(targetKind, target.Name), true, map[string]string{"style": "dashed"})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName("hpa", hpa.Name), g.resourceName(targetKind, target.Name), err)
 		}
 	}
 }

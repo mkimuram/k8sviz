@@ -12,6 +12,7 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/mkimuram/k8sviz/pkg/resources"
 	appsv1 "k8s.io/api/apps/v1"
+	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -26,6 +27,8 @@ var (
 	goldenDir    = "testdata"
 	goldenSuffix = ".golden"
 	// if -update flag is specified on test run, golden file for the test will be updated
+	// Please run:
+	// $ go test github.com/mkimuram/k8sviz/pkg/graph -update=true
 	update = flag.Bool("update", false, "update the golden files")
 
 	testRes1 = []runtime.Object{
@@ -43,7 +46,10 @@ var (
 		&appsv1.ReplicaSet{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "rs1",
 			Labels:          map[string]string{"app": "rs1"},
 			OwnerReferences: []metav1.OwnerReference{{APIVersion: "apps/v1", Kind: "Deployment", Name: "deploy1"}}}},
-		&appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "deploy1"}},
+		&appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "deploy1",
+			Labels: map[string]string{"app": "rs1"}}},
+		&autov1.HorizontalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "hpa1"},
+			Spec: autov1.HorizontalPodAutoscalerSpec{ScaleTargetRef: autov1.CrossVersionObjectReference{Kind: "Deployment", Name: "deploy1", APIVersion: "apps/v1"}}},
 		&v1beta1.Ingress{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ing1"},
 			Spec: v1beta1.IngressSpec{Rules: []v1beta1.IngressRule{
 				{IngressRuleValue: v1beta1.IngressRuleValue{
@@ -136,11 +142,14 @@ func expectedFromGoldenFile(name string) (string, error) {
 	return string(content), nil
 }
 
-func updateGoldenFile(name, content string) error {
+func updateGoldenFile(t *testing.T, name, content string) error {
 	if !*update {
 		return nil
 	}
-	return ioutil.WriteFile(getGoldenFilePath(name), []byte(content), 0644)
+
+	goldenFile := getGoldenFilePath(name)
+	t.Logf("Updating goldenfile %q\n", goldenFile)
+	return ioutil.WriteFile(goldenFile, []byte(content), 0644)
 }
 
 func TestGenerateCommon(t *testing.T) {
@@ -165,7 +174,7 @@ func TestGenerateCommon(t *testing.T) {
 		dot := g.toDot()
 
 		// Update golden file if -update flag is specified for this test run
-		err = updateGoldenFile(tc.expected, dot)
+		err = updateGoldenFile(t, tc.expected, dot)
 		if err != nil {
 			t.Fatalf("[%s] failed to update golden file %s: %v", tc.name, tc.expected, err)
 		}
@@ -210,7 +219,7 @@ func TestGenerate(t *testing.T) {
 		dot := g.toDot()
 
 		// Update golden file if -update flag is specified for this test run
-		err = updateGoldenFile(tc.expected, dot)
+		err = updateGoldenFile(t, tc.expected, dot)
 		if err != nil {
 			t.Fatalf("[%s] failed to update golden file %s: %v", tc.name, tc.expected, err)
 		}

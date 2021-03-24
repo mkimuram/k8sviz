@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
+	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -18,7 +19,7 @@ import (
 var (
 	// ResourceTypes represents the set of resource types.
 	// Resouces are grouped by the same level of abstraction.
-	ResourceTypes   = []string{"deploy job", "sts ds rs", "pod", "pvc", "svc", "ing"}
+	ResourceTypes   = []string{"hpa", "deploy job", "sts ds rs", "pod", "pvc", "svc", "ing"}
 	normalizedNames = map[string]string{
 		"ns":     "namespace",
 		"svc":    "service",
@@ -30,6 +31,7 @@ var (
 		"deploy": "deployment",
 		"job":    "job",
 		"ing":    "ingress",
+		"hpa":    "horizontalpodautoscaler",
 	}
 )
 
@@ -47,6 +49,7 @@ type Resources struct {
 	Deploys   *appsv1.DeploymentList
 	Jobs      *batchv1.JobList
 	Ingresses *v1beta1.IngressList
+	Hpas      *autov1.HorizontalPodAutoscalerList
 }
 
 // NewResources resturns Resources for the namespace
@@ -108,6 +111,12 @@ func NewResources(clientset kubernetes.Interface, namespace string) (*Resources,
 		return nil, fmt.Errorf("failed to get ingresses in namespace %q: %v", namespace, err)
 	}
 
+	// hpas
+	res.Hpas, err = clientset.AutoscalingV1().HorizontalPodAutoscalers(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hpas in namespace %q: %v", namespace, err)
+	}
+
 	return res, nil
 }
 
@@ -150,6 +159,10 @@ func (r *Resources) GetResourceNames(kind string) []string {
 		}
 	case "ing":
 		for _, n := range r.Ingresses.Items {
+			names = append(names, n.Name)
+		}
+	case "hpa":
+		for _, n := range r.Hpas.Items {
 			names = append(names, n.Name)
 		}
 	}
