@@ -1,7 +1,7 @@
 name: Slash Command Dispatch
 on:
   issue_comment:
-    types: [created]
+    types: [created, edited]
 jobs:
   slashCommandDispatch:
     runs-on: ubuntu-latest
