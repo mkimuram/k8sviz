@@ -2,10 +2,12 @@
 
 #### Variables ####
 NAMESPACE="default"
-OUTFILE="k8sviz.out"
+OUTDIR="out"
 TYPE="dot"
+GLOBAL_FILENAME="global"
 KUBECONFIG=~/kubeconfig
-CONTAINER_IMG=mkimuram/k8sviz:0.3
+#CONTAINER_IMG=mkimuram/k8sviz:0.3
+CONTAINER_IMG=docker.io/library/k8sviz:devel
 SHFLAGS_DIR="$(dirname ${BASH_SOURCE})/lib/"
 SHFLAGS_PATH="${SHFLAGS_DIR}shflags"
 SHFLAGS_URL="https://raw.githubusercontent.com/kward/shflags/master/shflags"
@@ -36,20 +38,21 @@ fi
 . ${SHFLAGS_PATH}
 
 DEFINE_string 'namespace' "${NAMESPACE}" 'The namespace to visualize.' 'n'
-DEFINE_string 'outfile' "${OUTFILE}" 'The filename to output.' 'o'
+DEFINE_string 'outdir' "${OUTDIR}" 'The directory to output.' 'o'
 DEFINE_string 'type' "${TYPE}" 'The type of output.' 't'
 DEFINE_string 'kubeconfig' "${KUBECONFIG}" 'Path to kubeconfig file.' 'k'
 DEFINE_string 'image' "${CONTAINER_IMG}" 'Image name of the container.' 'i'
+DEFINE_string 'filename' "${GLOBAL_FILENAME}" 'global filename with concatenated diagram.' 'f'
 
 # Parse Options
 FLAGS "$@" || exit $?
 eval set -- "${FLAGS_ARGV}"
 
 #### Main ####
-# Split OUTFILE to the directory and the filename to be used with container
-DIR=$(dirname ${FLAGS_outfile})
+# Split OUTDIR to the directory and the filename to be used with container
+DIR=$(dirname ${FLAGS_outdir})
 ABSDIR=$(cd ${DIR}; pwd -P)
-FILENAME=$(basename ${FLAGS_outfile})
+FILENAME=$(basename ${FLAGS_outdir})
 
 # Make KUBECONFIG to absolute path
 KUBEDIR=$(dirname ${FLAGS_kubeconfig})
@@ -64,10 +67,31 @@ if [ ! -f "${KUBECONFIG}" ];then
   exit 1
 fi
 
-docker run --network host                                    \
-  --user $(id -u):$(id -g)                                   \
-  -v ${ABSDIR}:/work                                         \
-  -v ${KUBECONFIG}:/config:ro                                \
-  -it --rm ${FLAGS_image}                                    \
-  /k8sviz -kubeconfig /config                                \
-  -n ${FLAGS_namespace} -t ${FLAGS_type} -o /work/${FILENAME}
+if [ -z $GLOBAL_FILENAME ]; then
+  docker run --network host                                            \
+    --user $(id -u):$(id -g)                                           \
+    -v ${ABSDIR}:/work                                                 \
+    -v ${KUBECONFIG}:/config:ro                                        \
+    -e GOOGLE_APPLICATION_CREDENTIALS=/work/service-account-key.json   \
+    -it --rm ${FLAGS_image}                                            \
+    /k8sviz -kubeconfig /config                                        \
+    -n ${FLAGS_namespace} -t ${FLAGS_type} -o /work/${FILENAME}
+
+else
+  docker run --network host                                            \
+    --user $(id -u):$(id -g)                                           \
+    -v ${ABSDIR}:/work                                                 \
+    -v ${KUBECONFIG}:/config:ro                                        \
+    -e GOOGLE_APPLICATION_CREDENTIALS=/work/service-account-key.json   \
+    -it --rm ${FLAGS_image}                                            \
+    /k8sviz -kubeconfig /config                                        \
+    -n ${FLAGS_namespace} -t 'dot' -o /work/${FILENAME}
+	m4 merge.m4 > merged.gv
+	sed -i -e "s/\/icons/icons/" merged.gv
+	if [ "dot" != "${FLAGS_type}" ]; then
+	  dot -n -T${FLAGS_type} merged.gv -o $GLOBAL_FILENAME.${FLAGS_type}
+	  rm merged.gv
+	else
+	  mv merged.gv $GLOBAL_FILENAME.${FLAGS_type}
+	fi
+fi

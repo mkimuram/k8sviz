@@ -1,2 +1,6 @@
 bin/
 lib/
+/out/*
+/k8sviz.iml
+service-account-key.json
+config-k8sviz

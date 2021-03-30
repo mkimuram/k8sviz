@@ -47,3 +47,16 @@ image-push: image-build
 	docker push $(IMAGE):$(TAG)
 
 .PHONY: test test-lint test-fmt test-vet test-unit test-e2e build release image-build image-push
+
+generate-graph:
+	mkdir -p out
+	./k8sviz.sh  -t dot -k config-k8sviz -o out -n "ns1,ns2" -f k8s-diagram.png
+
+merge-graph:
+	m4 merge.m4 > merged.gv
+	sed -i -e "s/\/icons/icons/" merged.gv
+	dot -n -Tpng merged.gv -o diagram_staging.png
+	m4 production.m4 > merged.gv
+	sed -i -e "s/\/icons/icons/" merged.gv
+	dot -n -Tpng merged.gv -o diagram_production.png
+	rm merged.gv
