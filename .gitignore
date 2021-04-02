@@ -4,3 +4,8 @@ lib/
 /k8sviz.iml
 service-account-key.json
 config-k8sviz
+/*.png
+/merged.gv-e
+/global.dot
+/config-k8sviz.json
+/service-account-key2.json

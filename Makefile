@@ -56,7 +56,4 @@ merge-graph:
 	m4 merge.m4 > merged.gv
 	sed -i -e "s/\/icons/icons/" merged.gv
 	dot -n -Tpng merged.gv -o diagram_staging.png
-	m4 production.m4 > merged.gv
-	sed -i -e "s/\/icons/icons/" merged.gv
-	dot -n -Tpng merged.gv -o diagram_production.png
 	rm merged.gv

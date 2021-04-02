@@ -4,7 +4,7 @@
 NAMESPACE="default"
 OUTDIR="out"
 TYPE="dot"
-GLOBAL_FILENAME="global"
+GLOBAL_FILENAME=""
 KUBECONFIG=~/kubeconfig
 #CONTAINER_IMG=mkimuram/k8sviz:0.3
 CONTAINER_IMG=docker.io/library/k8sviz:devel
@@ -75,7 +75,7 @@ if [ -z $GLOBAL_FILENAME ]; then
     -e GOOGLE_APPLICATION_CREDENTIALS=/work/service-account-key.json   \
     -it --rm ${FLAGS_image}                                            \
     /k8sviz -kubeconfig /config                                        \
-    -n ${FLAGS_namespace} -t ${FLAGS_type} -o /work/${FILENAME}
+    -t ${FLAGS_type} -n ${FLAGS_namespace} -o /work/${FILENAME}
 
 else
   docker run --network host                                            \
