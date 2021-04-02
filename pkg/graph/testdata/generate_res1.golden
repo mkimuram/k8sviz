@@ -1,4 +1,4 @@
-digraph G {
+digraph G_testns {
 	rankdir=TD;
 	0->1[ style=invis ];
 	1->2[ style=invis ];

@@ -1,4 +1,4 @@
-IMAGE ?= mkimuram/k8sviz
+IMAGE ?= sguerard/k8sviz
 TAG ?= 0.3
 DEVEL_IMAGE ?= k8sviz
 DEVEL_TAG ?= devel
