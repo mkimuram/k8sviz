@@ -6,13 +6,12 @@ package graph
 import (
 	"bytes"
 	"fmt"
-	"os"
-	"os/exec"
-	"strings"
-
 	"github.com/awalterschulze/gographviz"
 	"github.com/mkimuram/k8sviz/pkg/resources"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 // Graph represents a graph of k8s resources
@@ -36,7 +35,6 @@ func (g *Graph) WriteDotFile(outFile string) error {
 	if err != nil {
 		return err
 	}
-
 	if _, err := f.WriteString(g.toDot()); err != nil {
 		if closeErr := f.Close(); closeErr != nil {
 			return fmt.Errorf("failed to close file after write failure: %v, %v", closeErr, err)
@@ -125,15 +123,15 @@ func (g *Graph) generateCommon() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to set to digraph: %v\n", err)
 	}
-	err = g.gviz.SetName("G")
+	err = g.gviz.SetName("G_" + g.escapeName(g.res.Namespace))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to set to graph name to G: %v\n", err)
 	}
-	err = g.gviz.AddAttr("G", "rankdir", "TD")
+	err = g.gviz.AddAttr("G_"+g.escapeName(g.res.Namespace), "rankdir", "TD")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to set rankdir to TD: %v\n", err)
 	}
-	err = g.gviz.AddSubGraph("G", g.clusterName(),
+	err = g.gviz.AddSubGraph("G_"+g.escapeName(g.res.Namespace), g.clusterName(),
 		map[string]string{"label": g.clusterLabel(), "labeljust": "l", "style": "dotted"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to add subgraph %s to digraph G: %v\n", g.clusterName(), err)
@@ -217,6 +215,9 @@ func (g *Graph) generateEdges() {
 	// Owner reference for rs
 	g.genRsOwnerRef()
 
+	// Owner reference for job
+	g.genJobOwnerRef()
+
 	// hpa to scale target
 	g.genHpaScaleTargetRef()
 
@@ -257,6 +258,21 @@ func (g *Graph) genRsOwnerRef() {
 	// ```
 	for _, rs := range g.res.Rss.Items {
 		g.genOwnerRef("rs", &rs)
+	}
+}
+
+// genJobOwnerRef generates the edges of OwnerReferences from RS
+func (g *Graph) genJobOwnerRef() {
+	// Add edge if below matches:
+	//   - apps/v1.ReplicaSet.metadata.ownerReferences.
+	//     - kind
+	//     - name
+	//   - {kind}.metadata.{name}
+	// ```
+	// deploy_my_deployment->rs_my_replicaset[ style=dashed ];
+	// ```
+	for _, job := range g.res.Jobs.Items {
+		g.genOwnerRef("job", &job)
 	}
 }
 

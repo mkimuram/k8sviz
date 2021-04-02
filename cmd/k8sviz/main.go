@@ -6,24 +6,23 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/mkimuram/k8sviz/pkg/graph"
 	"github.com/mkimuram/k8sviz/pkg/resources"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"os"
+	"path/filepath"
+	"strings"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 const (
 	defaultNamespace   = "namespace"
-	defaultOutFile     = "k8sviz.out"
+	defaultOutDir      = "out"
 	defaultOutType     = "dot"
 	descNamespaceOpt   = "namespace to visualize"
-	descOutFileOpt     = "output filename"
+	descOutDirOpt      = "output dir"
 	descOutTypeOpt     = "type of output"
 	descShortOptSuffix = " (shorthand)"
 )
@@ -33,7 +32,7 @@ var (
 	dir       string
 	// Flags
 	namespace string
-	outFile   string
+	outDir    string
 	outType   string
 )
 
@@ -49,8 +48,8 @@ func init() {
 	}
 	flag.StringVar(&namespace, "namespace", defaultNamespace, descNamespaceOpt)
 	flag.StringVar(&namespace, "n", defaultNamespace, descNamespaceOpt+descShortOptSuffix)
-	flag.StringVar(&outFile, "outfile", defaultOutFile, descOutFileOpt)
-	flag.StringVar(&outFile, "o", defaultOutFile, descOutFileOpt+descShortOptSuffix)
+	flag.StringVar(&outDir, "outDir", defaultOutDir, descOutDirOpt)
+	flag.StringVar(&outDir, "o", defaultOutDir, descOutDirOpt+descShortOptSuffix)
 	flag.StringVar(&outType, "type", defaultOutType, descOutTypeOpt)
 	flag.StringVar(&outType, "t", defaultOutType, descOutTypeOpt+descShortOptSuffix)
 	flag.Parse()
@@ -70,11 +69,13 @@ func init() {
 	}
 
 	// test connectivity for k8s cluster and the namespace
-	_, err = clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get namespace %q: %v\n", namespace, err)
-		os.Exit(1)
-	}
+	//if !strings.Contains(namespace,",") {
+	//	_, err = clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
+	//	if err != nil {
+	//		fmt.Fprintf(os.Stderr, "Failed to get namespace %q: %v\n", namespace, err)
+	//		os.Exit(1)
+	//	}
+	//}
 
 	dir, err = getBinDir()
 	if err != nil {
@@ -85,23 +86,25 @@ func init() {
 
 func main() {
 	// Get all resources in the namespace
-	res, err := resources.NewResources(clientset, namespace)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to get k8s resources: %v\n", err)
-		os.Exit(1)
-	}
-
-	g := graph.NewGraph(res, dir)
-
-	if outType == "dot" {
-		if err := g.WriteDotFile(outFile); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to output %q file with format %q for namespace %q: %v\n", outFile, outType, namespace, err)
+	words := strings.Split(namespace, ",")
+	for _, ns := range words {
+		res, err := resources.NewResources(clientset, ns)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to get k8s resources: %v\n", err)
 			os.Exit(1)
 		}
-	} else {
-		if err := g.PlotDotFile(outFile, outType); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to output %q file with format %q for namespace %q: %v\n", outFile, outType, namespace, err)
-			os.Exit(1)
+
+		g := graph.NewGraph(res, dir)
+		if outType == "dot" {
+			if err := g.WriteDotFile(outDir + "/" + ns + "." + outType); err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to output %q file with format %q for namespace %q: %v\n", outDir, outType, namespace, err)
+				os.Exit(1)
+			}
+		} else {
+			if err := g.PlotDotFile(outDir+"/"+ns+"."+outType, outType); err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to output %q file with format %q for namespace %q: %v\n", outDir, outType, namespace, err)
+				os.Exit(1)
+			}
 		}
 	}
 }

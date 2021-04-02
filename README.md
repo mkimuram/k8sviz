@@ -55,11 +55,12 @@ $ cp -r icons ${PATH_TO_INSTALL}
 $ ./k8sviz.sh --help
 USAGE: ./k8sviz.sh [flags] args
 flags:
-  -n,--namespace:  The namespace to visualize. (default: 'default')
-  -o,--outfile:  The filename to output. (default: 'k8sviz.out')
+  -n,--namespace:  The namespace to visualize. It is possible to specify many coma separated namespaces (default: 'default')
+  -o,--outdir:  The directory to generate files. filename use namespace name (default: 'out')
   -t,--type:  The type of output. (default: 'dot')
   -k,--kubeconfig:  Path to kubeconfig file. (default: '/home/user1/kubeconfig')
   -i,--image:  Image name of the container. (default: 'mkimuram/k8sviz:0.3')
+  -f,--filename: concatenated diagram filename (default: "global.dot") 
   -h,--help:  show this help (default: false)
 ```
 
@@ -91,13 +92,13 @@ Usage of ./k8sviz:
   -kubeconfig string
         absolute path to the kubeconfig file (default "/home/user1/.kube/config")
   -n string
-        namespace to visualize (shorthand) (default "namespace")
+        namespace to visualize. It is possible to specify many coma separated namespaces (shorthand) (default "namespace")
   -namespace string
-        namespace to visualize (default "namespace")
+        namespace to visualize. It is possible to specify many coma separated namespaces (default "namespace")
   -o string
-        output filename (shorthand) (default "k8sviz.out")
-  -outfile string
-        output filename (default "k8sviz.out")
+        output directory (shorthand) (default "out")
+  -outdir string
+        output directory. filename is based on each namespace name (default "k8sviz.out")
   -t string
         type of output (shorthand) (default "dot")
   -type string
