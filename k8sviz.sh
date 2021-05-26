@@ -4,7 +4,7 @@
 NAMESPACE="default"
 OUTFILE="k8sviz.out"
 TYPE="dot"
-KUBECONFIG=~/kubeconfig
+KUBECONFIG=~/.kube/config
 CONTAINER_IMG=mkimuram/k8sviz:0.3
 SHFLAGS_DIR="$(dirname ${BASH_SOURCE})/lib/"
 SHFLAGS_PATH="${SHFLAGS_DIR}shflags"

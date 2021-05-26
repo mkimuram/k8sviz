@@ -58,7 +58,7 @@ flags:
   -n,--namespace:  The namespace to visualize. (default: 'default')
   -o,--outfile:  The filename to output. (default: 'k8sviz.out')
   -t,--type:  The type of output. (default: 'dot')
-  -k,--kubeconfig:  Path to kubeconfig file. (default: '/home/user1/kubeconfig')
+  -k,--kubeconfig:  Path to kubeconfig file. (default: '/home/user1/.kube/config')
   -i,--image:  Image name of the container. (default: 'mkimuram/k8sviz:0.3')
   -h,--help:  show this help (default: false)
 ```
