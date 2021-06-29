@@ -92,6 +92,16 @@ func NewResources(clientset kubernetes.Interface, namespace string) (*Resources,
 	if err != nil {
 		return nil, fmt.Errorf("failed to get replicasets in namespace %q: %v", namespace, err)
 	}
+	// Remove old rss from the list
+	removedList := []appsv1.ReplicaSet{}
+	for _, rs := range res.Rss.Items {
+		// Old replicaset has both desired replicas and current replicas set to 0
+		if rs.Spec.Replicas != nil && *rs.Spec.Replicas == int32(0) && rs.Status.Replicas == int32(0) {
+			continue
+		}
+		removedList = append(removedList, rs)
+	}
+	res.Rss.Items = removedList
 
 	// deployment
 	res.Deploys, err = clientset.AppsV1().Deployments(namespace).List(metav1.ListOptions{})
