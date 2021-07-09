@@ -17,6 +17,8 @@ import (
 )
 
 var (
+	zero      = int32(0)
+	one       = int32(1)
 	testns    = "testns"
 	nontestns = "nontestns"
 	testRes1  = []runtime.Object{
@@ -27,7 +29,26 @@ var (
 		&corev1.PersistentVolumeClaim{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "pvc1"}},
 		&appsv1.StatefulSet{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "sts1"}},
 		&appsv1.DaemonSet{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ds1"}},
-		&appsv1.ReplicaSet{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "rs1"}},
+		&appsv1.ReplicaSet{
+			ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "rs1"},
+			Spec:       appsv1.ReplicaSetSpec{Replicas: &one},
+			Status:     appsv1.ReplicaSetStatus{Replicas: int32(1)},
+		},
+		&appsv1.ReplicaSet{
+			ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "rs2"},
+			Spec:       appsv1.ReplicaSetSpec{Replicas: &zero},
+			Status:     appsv1.ReplicaSetStatus{Replicas: int32(1)},
+		},
+		&appsv1.ReplicaSet{
+			ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "rs3"},
+			Spec:       appsv1.ReplicaSetSpec{Replicas: &one},
+			Status:     appsv1.ReplicaSetStatus{Replicas: int32(0)},
+		},
+		&appsv1.ReplicaSet{
+			ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "rs4"},
+			Spec:       appsv1.ReplicaSetSpec{Replicas: &zero},
+			Status:     appsv1.ReplicaSetStatus{Replicas: int32(0)},
+		},
 		&appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "deploy1"}},
 		&batchv1.Job{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "job1"}},
 		&v1beta1.Ingress{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ing1"}},
@@ -85,10 +106,10 @@ func TestGetResourceNames(t *testing.T) {
 			expected:  []string{"ds1"},
 		},
 		{
-			name:      "rs1 in testns and kind:rs is specified",
+			name:      "rs1, rs2, rs3 and rs4(with no replica) in testns and kind:rs is specified",
 			resources: testRes1,
 			kind:      "rs",
-			expected:  []string{"rs1"},
+			expected:  []string{"rs1", "rs2", "rs3"},
 		},
 		{
 			name:      "deploy1 in testns and kind:deploy is specified",
