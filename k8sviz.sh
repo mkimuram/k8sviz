@@ -5,10 +5,12 @@ NAMESPACE="default"
 OUTFILE="k8sviz.out"
 TYPE="dot"
 KUBECONFIG=~/.kube/config
-CONTAINER_IMG=mkimuram/k8sviz:0.3
 SHFLAGS_DIR="$(dirname ${BASH_SOURCE})/lib/"
 SHFLAGS_PATH="${SHFLAGS_DIR}shflags"
 SHFLAGS_URL="https://raw.githubusercontent.com/kward/shflags/master/shflags"
+VERSION_URL="https://raw.githubusercontent.com/mkimuram/k8sviz/master/version.txt"
+VERSION=$(curl -L -s ${VERSION_URL})
+CONTAINER_IMG=mkimuram/k8sviz:${VERSION}
 
 if [ ! -f ${SHFLAGS_PATH} ];then
 	echo "${SHFLAGS_PATH} not found. Downloading." >&2

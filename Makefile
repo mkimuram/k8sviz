@@ -1,5 +1,5 @@
 IMAGE ?= mkimuram/k8sviz
-TAG ?= 0.3
+TAG ?= $(shell cat version.txt)
 DEVEL_IMAGE ?= k8sviz
 DEVEL_TAG ?= devel
 
