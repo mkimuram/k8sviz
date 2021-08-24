@@ -26,7 +26,7 @@ test-unit:
 	@echo "[Running unit tests]"
 	go test -cover `go list ./... | grep -v test/e2e`
 
-test-e2e:
+test-e2e: build
 	@echo "[Running e2e tests]"
 	./test/e2e/e2e.sh
 
