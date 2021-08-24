@@ -13,7 +13,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -51,7 +51,7 @@ type Resources struct {
 	Deploys   *appsv1.DeploymentList
 	Jobs      *batchv1.JobList
 	CronJobs  *batchv1beta1.CronJobList
-	Ingresses *v1beta1.IngressList
+	Ingresses *netv1.IngressList
 	Hpas      *autov1.HorizontalPodAutoscalerList
 }
 
@@ -125,7 +125,7 @@ func NewResources(clientset kubernetes.Interface, namespace string) (*Resources,
 	}
 
 	// ingress
-	res.Ingresses, err = clientset.ExtensionsV1beta1().Ingresses(namespace).List(context.TODO(), metav1.ListOptions{})
+	res.Ingresses, err = clientset.NetworkingV1().Ingresses(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ingresses in namespace %q: %v", namespace, err)
 	}

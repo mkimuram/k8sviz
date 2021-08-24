@@ -391,7 +391,7 @@ func (g *Graph) genSvcPodRef() {
 // genIngSvcRef generates the edges of Ingress to Service reference
 func (g *Graph) genIngSvcRef() {
 	// Add edge if below matches:
-	//   - networking.k8s.io/v1beta1.Ingress.spec.rules.path[].backend.serviceName
+	//   - networking.k8s.io/v1.Ingress.spec.rules.HTTP.paths[].backend.service.name
 	//   - v1.Service.metadata.name
 	// ```
 	// svc_my_service->ing_my_ingress[ dir=back ];
@@ -399,14 +399,14 @@ func (g *Graph) genIngSvcRef() {
 	for _, ing := range g.res.Ingresses.Items {
 		for _, rule := range ing.Spec.Rules {
 			for _, path := range rule.IngressRuleValue.HTTP.Paths {
-				if !g.res.HasResource("svc", path.Backend.ServiceName) {
-					fmt.Fprintf(os.Stderr, "svc %s not found for ingress %s\n", path.Backend.ServiceName, ing.Name)
+				if !g.res.HasResource("svc", path.Backend.Service.Name) {
+					fmt.Fprintf(os.Stderr, "svc %s not found for ingress %s\n", path.Backend.Service.Name, ing.Name)
 					continue
 				}
 
-				err := g.gviz.AddEdge(g.resourceName("svc", path.Backend.ServiceName), g.resourceName("ing", ing.Name), true, map[string]string{"dir": "back"})
+				err := g.gviz.AddEdge(g.resourceName("svc", path.Backend.Service.Name), g.resourceName("ing", ing.Name), true, map[string]string{"dir": "back"})
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName("svc", path.Backend.ServiceName), g.resourceName("ing", ing.Name), err)
+					fmt.Fprintf(os.Stderr, "Failed to add edge from %s to %s: %v\n", g.resourceName("svc", path.Backend.Service.Name), g.resourceName("ing", ing.Name), err)
 				}
 			}
 		}
