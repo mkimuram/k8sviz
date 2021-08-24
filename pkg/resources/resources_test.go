@@ -9,7 +9,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,7 +51,7 @@ var (
 		},
 		&appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "deploy1"}},
 		&batchv1.Job{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "job1"}},
-		&batchv1beta1.CronJob{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "cronjob1"}},
+		&batchv1.CronJob{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "cronjob1"}},
 		&netv1.Ingress{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ing1"}},
 		&autov1.HorizontalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "hpa1"}},
 	}

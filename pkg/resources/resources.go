@@ -11,7 +11,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,7 +49,7 @@ type Resources struct {
 	Rss       *appsv1.ReplicaSetList
 	Deploys   *appsv1.DeploymentList
 	Jobs      *batchv1.JobList
-	CronJobs  *batchv1beta1.CronJobList
+	CronJobs  *batchv1.CronJobList
 	Ingresses *netv1.IngressList
 	Hpas      *autov1.HorizontalPodAutoscalerList
 }
@@ -119,7 +118,7 @@ func NewResources(clientset kubernetes.Interface, namespace string) (*Resources,
 	}
 
 	// cronJob
-	res.CronJobs, err = clientset.BatchV1beta1().CronJobs(namespace).List(context.TODO(), metav1.ListOptions{})
+	res.CronJobs, err = clientset.BatchV1().CronJobs(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cronjobs in namespace %q: %v", namespace, err)
 	}
