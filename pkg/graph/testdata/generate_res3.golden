@@ -9,6 +9,7 @@ digraph G {
 	ds_ds1->pod_ds1_pod1[ style=dashed ];
 	ds_ds1->pod_ds1_pod2[ style=dashed ];
 	job_job1->pod_job1_pod1[ style=dashed ];
+	cronjob_cronjob1->job_job1[ style=dashed ];
 	0->1[ style=invis ];
 	1->2[ style=invis ];
 	2->3[ style=invis ];
@@ -18,6 +19,7 @@ digraph G {
 	ds_ds1->pod_ds1_pod1[ style=dashed ];
 	ds_ds1->pod_ds1_pod2[ style=dashed ];
 	job_job1->pod_job1_pod1[ style=dashed ];
+	cronjob_cronjob1->job_job1[ style=dashed ];
 	subgraph cluster_testns {
 	label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/ns-128.png" /></TD></TR><TR><TD>testns</TD></TR></TABLE>>;
 	labeljust=l;
@@ -26,6 +28,7 @@ digraph G {
 	rank=same;
 	style=invis;
 	0 [ height=0, margin=0, style=invis, width=0 ];
+	cronjob_cronjob1 [ label=<<TABLE BORDER="0"><TR><TD><IMG SRC="/testdir/icons/cronjob-128.png" /></TD></TR><TR><TD>cronjob1</TD></TR></TABLE>>, penwidth=0 ];
 
 }
 ;

@@ -9,6 +9,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -51,6 +52,7 @@ var (
 		},
 		&appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "deploy1"}},
 		&batchv1.Job{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "job1"}},
+		&batchv1beta1.CronJob{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "cronjob1"}},
 		&v1beta1.Ingress{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ing1"}},
 		&autov1.HorizontalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "hpa1"}},
 	}
@@ -122,6 +124,12 @@ func TestGetResourceNames(t *testing.T) {
 			resources: testRes1,
 			kind:      "job",
 			expected:  []string{"job1"},
+		},
+		{
+			name:      "cronjob1 in testns and kind:cronjob is specified",
+			resources: testRes1,
+			kind:      "cronjob",
+			expected:  []string{"cronjob1"},
 		},
 		{
 			name:      "ing1 in testns and kind:ingress is specified",
@@ -261,6 +269,13 @@ func TestHasResource(t *testing.T) {
 			resources:    testRes1,
 			kind:         "job",
 			resourceName: "job1",
+			expected:     true,
+		},
+		{
+			name:         "cronjob1 in testns and cronjob/cronjob1 is specified",
+			resources:    testRes1,
+			kind:         "cronjob",
+			resourceName: "cronjob1",
 			expected:     true,
 		},
 		{

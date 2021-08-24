@@ -217,6 +217,9 @@ func (g *Graph) generateEdges() {
 	// Owner reference for rs
 	g.genRsOwnerRef()
 
+	// Owner reference for job
+	g.genJobOwnerRef()
+
 	// hpa to scale target
 	g.genHpaScaleTargetRef()
 
@@ -257,6 +260,21 @@ func (g *Graph) genRsOwnerRef() {
 	// ```
 	for _, rs := range g.res.Rss.Items {
 		g.genOwnerRef("rs", &rs)
+	}
+}
+
+// genJobOwnerRef generates the edges of OwnerReferences from job
+func (g *Graph) genJobOwnerRef() {
+	// Add edge if below matches:
+	//   - batch/v1.Job.metadata.ownerReferences.
+	//     - kind
+	//     - name
+	//   - {kind}.metadata.{name}
+	// ```
+	// cronjob_my_cronjob->job_my_job[ style=dashed ];
+	// ```
+	for _, job := range g.res.Jobs.Items {
+		g.genOwnerRef("job", &job)
 	}
 }
 

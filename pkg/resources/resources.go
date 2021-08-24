@@ -10,6 +10,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,20 +20,20 @@ import (
 var (
 	// ResourceTypes represents the set of resource types.
 	// Resouces are grouped by the same level of abstraction.
-	ResourceTypes   = []string{"hpa", "deploy job", "sts ds rs", "pod", "pvc", "svc", "ing"}
+	ResourceTypes   = []string{"hpa cronjob", "deploy job", "sts ds rs", "pod", "pvc", "svc", "ing"}
 	normalizedNames = map[string]string{
-		"ns":     "namespace",
-		"svc":    "service",
-		"pvc":    "persistentvolumeclaim",
-		"pod":    "po",
-		"sts":    "statefulset",
-		"ds":     "daemonset",
-		"rs":     "replicaset",
-		"deploy": "deployment",
-		"job":    "job",
-		"ing":    "ingress",
-		"hpa":    "horizontalpodautoscaler",
-	}
+		"ns":      "namespace",
+		"svc":     "service",
+		"pvc":     "persistentvolumeclaim",
+		"pod":     "po",
+		"sts":     "statefulset",
+		"ds":      "daemonset",
+		"rs":      "replicaset",
+		"deploy":  "deployment",
+		"job":     "job",
+		"cronjob": "cj",
+		"ing":     "ingress",
+		"hpa":     "horizontalpodautoscaler"}
 )
 
 // Resources represents the k8s resources
@@ -48,6 +49,7 @@ type Resources struct {
 	Rss       *appsv1.ReplicaSetList
 	Deploys   *appsv1.DeploymentList
 	Jobs      *batchv1.JobList
+	CronJobs  *batchv1beta1.CronJobList
 	Ingresses *v1beta1.IngressList
 	Hpas      *autov1.HorizontalPodAutoscalerList
 }
@@ -115,6 +117,12 @@ func NewResources(clientset kubernetes.Interface, namespace string) (*Resources,
 		return nil, fmt.Errorf("failed to get jobs in namespace %q: %v", namespace, err)
 	}
 
+	// cronJob
+	res.CronJobs, err = clientset.BatchV1beta1().CronJobs(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cronjobs in namespace %q: %v", namespace, err)
+	}
+
 	// ingress
 	res.Ingresses, err = clientset.ExtensionsV1beta1().Ingresses(namespace).List(metav1.ListOptions{})
 	if err != nil {
@@ -165,6 +173,10 @@ func (r *Resources) GetResourceNames(kind string) []string {
 		}
 	case "job":
 		for _, n := range r.Jobs.Items {
+			names = append(names, n.Name)
+		}
+	case "cronjob":
+		for _, n := range r.CronJobs.Items {
 			names = append(names, n.Name)
 		}
 	case "ing":
