@@ -9,8 +9,7 @@ require (
 	github.com/onsi/ginkgo v1.15.2
 	github.com/onsi/gomega v1.10.1
 	github.com/sergi/go-diff v1.1.0 // indirect
-	golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 // indirect
-	k8s.io/api v0.20.10
-	k8s.io/apimachinery v0.20.10
-	k8s.io/client-go v0.20.10
+	k8s.io/api v0.21.4
+	k8s.io/apimachinery v0.21.4
+	k8s.io/client-go v0.21.4
 )
