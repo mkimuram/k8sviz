@@ -4,15 +4,15 @@
 package resources
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -49,8 +49,8 @@ type Resources struct {
 	Rss       *appsv1.ReplicaSetList
 	Deploys   *appsv1.DeploymentList
 	Jobs      *batchv1.JobList
-	CronJobs  *batchv1beta1.CronJobList
-	Ingresses *v1beta1.IngressList
+	CronJobs  *batchv1.CronJobList
+	Ingresses *netv1.IngressList
 	Hpas      *autov1.HorizontalPodAutoscalerList
 }
 
@@ -60,37 +60,37 @@ func NewResources(clientset kubernetes.Interface, namespace string) (*Resources,
 	res := &Resources{clientset: clientset, Namespace: namespace}
 
 	// service
-	res.Svcs, err = clientset.CoreV1().Services(namespace).List(metav1.ListOptions{})
+	res.Svcs, err = clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get services in namespace %q: %v", namespace, err)
 	}
 
 	// persistentvolumeclaim
-	res.Pvcs, err = clientset.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{})
+	res.Pvcs, err = clientset.CoreV1().PersistentVolumeClaims(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get persistentVolumeClaims in namespace %q: %v", namespace, err)
 	}
 
 	// pod
-	res.Pods, err = clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{})
+	res.Pods, err = clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get pods in namespace %q: %v", namespace, err)
 	}
 
 	// statefulset
-	res.Stss, err = clientset.AppsV1().StatefulSets(namespace).List(metav1.ListOptions{})
+	res.Stss, err = clientset.AppsV1().StatefulSets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get statefulsets in namespace %q: %v", namespace, err)
 	}
 
 	// daemonset
-	res.Dss, err = clientset.AppsV1().DaemonSets(namespace).List(metav1.ListOptions{})
+	res.Dss, err = clientset.AppsV1().DaemonSets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get daemonsets in namespace %q: %v", namespace, err)
 	}
 
 	// replicaset
-	res.Rss, err = clientset.AppsV1().ReplicaSets(namespace).List(metav1.ListOptions{})
+	res.Rss, err = clientset.AppsV1().ReplicaSets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get replicasets in namespace %q: %v", namespace, err)
 	}
@@ -106,31 +106,31 @@ func NewResources(clientset kubernetes.Interface, namespace string) (*Resources,
 	res.Rss.Items = removedList
 
 	// deployment
-	res.Deploys, err = clientset.AppsV1().Deployments(namespace).List(metav1.ListOptions{})
+	res.Deploys, err = clientset.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get deployments in namespace %q: %v", namespace, err)
 	}
 
 	// job
-	res.Jobs, err = clientset.BatchV1().Jobs(namespace).List(metav1.ListOptions{})
+	res.Jobs, err = clientset.BatchV1().Jobs(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get jobs in namespace %q: %v", namespace, err)
 	}
 
 	// cronJob
-	res.CronJobs, err = clientset.BatchV1beta1().CronJobs(namespace).List(metav1.ListOptions{})
+	res.CronJobs, err = clientset.BatchV1().CronJobs(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cronjobs in namespace %q: %v", namespace, err)
 	}
 
 	// ingress
-	res.Ingresses, err = clientset.ExtensionsV1beta1().Ingresses(namespace).List(metav1.ListOptions{})
+	res.Ingresses, err = clientset.NetworkingV1().Ingresses(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ingresses in namespace %q: %v", namespace, err)
 	}
 
 	// hpas
-	res.Hpas, err = clientset.AutoscalingV1().HorizontalPodAutoscalers(namespace).List(metav1.ListOptions{})
+	res.Hpas, err = clientset.AutoscalingV1().HorizontalPodAutoscalers(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get hpas in namespace %q: %v", namespace, err)
 	}

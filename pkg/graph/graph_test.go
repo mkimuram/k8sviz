@@ -14,9 +14,8 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
@@ -51,14 +50,18 @@ var (
 			Labels: map[string]string{"app": "rs1"}}},
 		&autov1.HorizontalPodAutoscaler{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "hpa1"},
 			Spec: autov1.HorizontalPodAutoscalerSpec{ScaleTargetRef: autov1.CrossVersionObjectReference{Kind: "Deployment", Name: "deploy1", APIVersion: "apps/v1"}}},
-		&v1beta1.Ingress{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ing1"},
-			Spec: v1beta1.IngressSpec{Rules: []v1beta1.IngressRule{
-				{IngressRuleValue: v1beta1.IngressRuleValue{
-					HTTP: &v1beta1.HTTPIngressRuleValue{
-						Paths: []v1beta1.HTTPIngressPath{
+		&netv1.Ingress{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ing1"},
+			Spec: netv1.IngressSpec{Rules: []netv1.IngressRule{
+				{IngressRuleValue: netv1.IngressRuleValue{
+					HTTP: &netv1.HTTPIngressRuleValue{
+						Paths: []netv1.HTTPIngressPath{
 							{
-								Path:    "/",
-								Backend: v1beta1.IngressBackend{ServiceName: "svc1"},
+								Path: "/",
+								Backend: netv1.IngressBackend{
+									Service: &netv1.IngressServiceBackend{
+										Name: "svc1",
+									},
+								},
 							},
 						},
 					},
@@ -119,7 +122,7 @@ var (
 		&appsv1.DaemonSet{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ds1"}},
 		&batchv1.Job{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "job1",
 			OwnerReferences: []metav1.OwnerReference{{APIVersion: "batch/v1beta1", Kind: "cronJob", Name: "cronjob1"}}}},
-		&batchv1beta1.CronJob{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "cronjob1"}},
+		&batchv1.CronJob{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "cronjob1"}},
 	}
 )
 

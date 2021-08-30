@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -70,7 +71,7 @@ func init() {
 	}
 
 	// test connectivity for k8s cluster and the namespace
-	_, err = clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
+	_, err = clientset.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to get namespace %q: %v\n", namespace, err)
 		os.Exit(1)

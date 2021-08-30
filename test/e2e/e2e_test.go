@@ -2,6 +2,7 @@ package e2e_test
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,7 +13,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -114,7 +115,7 @@ func getObjFromFile(path string) runtime.Object {
 	_ = appsv1.AddToScheme(sch)
 	_ = batchv1.AddToScheme(sch)
 	_ = corev1.AddToScheme(sch)
-	_ = v1beta1.AddToScheme(sch)
+	_ = netv1.AddToScheme(sch)
 
 	decode := serializer.NewCodecFactory(sch).UniversalDeserializer().Decode
 
@@ -128,7 +129,7 @@ func createFromFile(cs *kubernetes.Clientset, path, namespace string) {
 
 	switch o := obj.(type) {
 	case *corev1.Pod:
-		_, err := cs.CoreV1().Pods(namespace).Create(o)
+		_, err := cs.CoreV1().Pods(namespace).Create(context.TODO(), o, metav1.CreateOptions{})
 		Expect(err).NotTo(HaveOccurred(), "Failed to create pod %v: %v", o, err)
 	}
 }
@@ -138,7 +139,7 @@ func deleteFromFile(cs *kubernetes.Clientset, path, namespace string) {
 
 	switch o := obj.(type) {
 	case *corev1.Pod:
-		err := cs.CoreV1().Pods(namespace).Delete(o.GetName(), &metav1.DeleteOptions{})
+		err := cs.CoreV1().Pods(namespace).Delete(context.TODO(), o.GetName(), metav1.DeleteOptions{})
 		Expect(err).NotTo(HaveOccurred(), "Failed to create pod %v: %v", o, err)
 	}
 }
