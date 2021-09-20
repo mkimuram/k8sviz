@@ -25,6 +25,13 @@ To build binary, it requires:
 - make
 - go
 
+## Version compatibility matrix
+
+| k8sviz version          | k8s 1.20 or earlier | k8s 1.21 or later |
+|-------------------------|---------------------|-------------------|
+| k8sviz 0.3.2 or earlier |  Yes                |  No               |
+| k8sviz 0.3.3 or later   |  No                 |  Yes              |
+
 ## Installation
 ### Bash script version
 Just download `k8sviz.sh` file and add execute permission.
