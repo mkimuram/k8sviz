@@ -83,7 +83,7 @@ flags:
 
 - 📝NOTE
 
-	If you can't pull the container image and need to build it by yourself,
+	If you can't pull the container image or need to build it by yourself,
 	you can do it by `make image-build`. It would be helpful if you specify
 	`DEVEL_IMAGE` and `DEVEL_TAG` to make the image name the same to the
 	default one (Below example will set image name to `mkimuram/k8sviz:0.3`).
@@ -91,10 +91,14 @@ flags:
 	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) make image-build
 	```
 
-	An example use case of creating custom image is to include aws_sdk.
-	To create a custom image that include aws_sdk, run below command:
+	An example use case of creating custom image is to include AWS SDK or Google Cloud SDK.
+	To create a custom image that include AWS SDK, run below command:
 	```shell
 	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) TARGET=aws make image-build
+	```
+	To create a custom image that include Google Cloud SDK, run below command:
+	```shell
+	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) TARGET=gcloud make image-build
 	```
 
 ### Go version
