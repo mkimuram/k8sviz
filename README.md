@@ -88,7 +88,13 @@ flags:
 	`DEVEL_IMAGE` and `DEVEL_TAG` to make the image name the same to the
 	default one (Below example will set image name to `mkimuram/k8sviz:0.3`).
 	```shell
-	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=0.3 make image-build
+	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) make image-build
+	```
+
+	An example use case of creating custom image is to include aws_sdk.
+	To create a custom image that include aws_sdk, run below command:
+	```shell
+	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) TARGET=aws make image-build
 	```
 
 ### Go version
