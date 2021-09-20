@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/mkimuram/k8sviz/pkg/graph"
 	"github.com/mkimuram/k8sviz/pkg/resources"
@@ -89,6 +90,10 @@ func main() {
 	res, err := resources.NewResources(clientset, namespace)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to get k8s resources: %v\n", err)
+		if strings.Contains(err.Error(), "the server could not find the requested resource") {
+			fmt.Fprintf(os.Stderr, "k8sviz 0.3.3 or later only support k8s 1.21 or later.\n")
+			fmt.Fprintf(os.Stderr, "If you are using older k8s cluster, try k8sviz 0.3.2 or earlier.\n")
+		}
 		os.Exit(1)
 	}
 
