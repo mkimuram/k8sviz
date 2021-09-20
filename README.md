@@ -86,7 +86,7 @@ flags:
 	If you can't pull the container image or need to build it by yourself,
 	you can do it by `make image-build`. It would be helpful if you specify
 	`DEVEL_IMAGE` and `DEVEL_TAG` to make the image name the same to the
-	default one (Below example will set image name to `mkimuram/k8sviz:0.3`).
+	default one (Below example will set image name like `mkimuram/k8sviz:0.3.4`).
 	```shell
 	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) make image-build
 	```
@@ -108,9 +108,9 @@ Usage of ./k8sviz:
   -kubeconfig string
         absolute path to the kubeconfig file (default "/home/user1/.kube/config")
   -n string
-        namespace to visualize (shorthand) (default "namespace")
+        namespace to visualize (shorthand) (default "default")
   -namespace string
-        namespace to visualize (default "namespace")
+        namespace to visualize (default "default")
   -o string
         output filename (shorthand) (default "k8sviz.out")
   -outfile string
