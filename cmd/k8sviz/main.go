@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	defaultNamespace   = "namespace"
+	defaultNamespace   = "default"
 	defaultOutFile     = "k8sviz.out"
 	defaultOutType     = "dot"
 	descNamespaceOpt   = "namespace to visualize"
