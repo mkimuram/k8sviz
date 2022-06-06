@@ -2,6 +2,7 @@ IMAGE ?= mkimuram/k8sviz
 TAG ?= $(shell cat version.txt)
 DEVEL_IMAGE ?= k8sviz
 DEVEL_TAG ?= devel
+TARGET ?= vanilla
 
 test: test-lint test-fmt test-vet test-unit
 	@echo "[Running test]"
@@ -39,7 +40,7 @@ release: test build test-e2e
 
 image-build:
 	@echo "[Building image $(DEVEL_IMAGE):$(DEVEL_TAG)]"
-	docker build -t $(DEVEL_IMAGE):$(DEVEL_TAG) .
+	docker build -t $(DEVEL_IMAGE):$(DEVEL_TAG) --target $(TARGET) .
 
 image-push: image-build
 	@echo "[Pushing image $(IMAGE):$(TAG)]"

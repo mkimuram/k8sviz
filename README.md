@@ -83,12 +83,22 @@ flags:
 
 - 📝NOTE
 
-	If you can't pull the container image and need to build it by yourself,
+	If you can't pull the container image or need to build it by yourself,
 	you can do it by `make image-build`. It would be helpful if you specify
 	`DEVEL_IMAGE` and `DEVEL_TAG` to make the image name the same to the
-	default one (Below example will set image name to `mkimuram/k8sviz:0.3`).
+	default one (Below example will set image name like `mkimuram/k8sviz:0.3.4`).
 	```shell
-	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=0.3 make image-build
+	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) make image-build
+	```
+
+	An example use case of creating custom image is to include AWS SDK or Google Cloud SDK.
+	To create a custom image that include AWS SDK, run below command:
+	```shell
+	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) TARGET=aws make image-build
+	```
+	To create a custom image that include Google Cloud SDK, run below command:
+	```shell
+	$ DEVEL_IMAGE=mkimuram/k8sviz DEVEL_TAG=$(cat version.txt) TARGET=gcloud make image-build
 	```
 
 ### Go version
@@ -98,9 +108,9 @@ Usage of ./k8sviz:
   -kubeconfig string
         absolute path to the kubeconfig file (default "/home/user1/.kube/config")
   -n string
-        namespace to visualize (shorthand) (default "namespace")
+        namespace to visualize (shorthand) (default "default")
   -namespace string
-        namespace to visualize (default "namespace")
+        namespace to visualize (default "default")
   -o string
         output filename (shorthand) (default "k8sviz.out")
   -outfile string
