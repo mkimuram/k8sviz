@@ -287,7 +287,7 @@ func (g *Graph) genOwnerRef(kind string, obj metav1.Object) {
 			continue
 		}
 		if !g.res.HasResource(ownerKind, ref.Name) {
-			fmt.Fprintf(os.Stderr, "%s %s not found as a owner refernce for rs %s\n", ownerKind, ref.Name, obj.GetName())
+			fmt.Fprintf(os.Stderr, "%s %s not found as a owner reference for rs %s\n", ownerKind, ref.Name, obj.GetName())
 			continue
 		}
 
