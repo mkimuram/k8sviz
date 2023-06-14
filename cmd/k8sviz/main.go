@@ -21,28 +21,28 @@ import (
 )
 
 const (
-	defaultNamespace   		= "default"
-	defaultOutFile     		= "k8sviz.out"
-	defaultOutType     		= "dot"
-	defaultLabelSelector	= ""
-	defaultFieldSelector	= ""
-	descNamespaceOpt   		= "namespace to visualize"
-	descOutFileOpt     		= "output filename"
-	descOutTypeOpt     		= "type of output"
-	descShortOptSuffix 		= " (shorthand)"
-	descLabelSelector		= "label selector"
-	descFieldSelector		= "field selector"
+	defaultNamespace   	 = "default"
+	defaultOutFile     	 = "k8sviz.out"
+	defaultOutType     	 = "dot"
+	defaultLabelSelector = ""
+	defaultFieldSelector = ""
+	descNamespaceOpt   	 = "namespace to visualize"
+	descOutFileOpt     	 = "output filename"
+	descOutTypeOpt     	 = "type of output"
+	descShortOptSuffix 	 = " (shorthand)"
+	descLabelSelector	 = "label selector"
+	descFieldSelector	 = "field selector"
 )
 
 var (
 	clientset *kubernetes.Clientset
-	dir       		string
+	dir           string
 	// Flags
-	namespace 		string
-	outFile   		string
-	outType   		string
-	labelSelector	string
-	fieldSelector	string
+	namespace     string
+	outFile       string
+	outType       string
+	labelSelector string
+	fieldSelector string
 )
 
 func init() {
@@ -61,8 +61,8 @@ func init() {
 	flag.StringVar(&outFile, "o", defaultOutFile, descOutFileOpt+descShortOptSuffix)
 	flag.StringVar(&outType, "type", defaultOutType, descOutTypeOpt)
 	flag.StringVar(&outType, "t", defaultOutType, descOutTypeOpt+descShortOptSuffix)
-	flag.StringVar(&labelSelector, "l", defaultLabelSelector, descLabelSelector)
 	flag.StringVar(&labelSelector, "selector", defaultLabelSelector, descLabelSelector)
+	flag.StringVar(&labelSelector, "l", defaultLabelSelector, descLabelSelector+descShortOptSuffix)
 	flag.StringVar(&fieldSelector, "field-selector", defaultFieldSelector, descFieldSelector)
 	flag.Parse()
 
