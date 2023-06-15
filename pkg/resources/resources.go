@@ -61,7 +61,7 @@ func NewResources(clientset kubernetes.Interface, namespace string, labelSelecto
 
 	listOptions := metav1.ListOptions{
 		LabelSelector: labelSelector,
-		FieldSelector: fieldSelector
+		FieldSelector: fieldSelector,
 	}
 
 	// service
