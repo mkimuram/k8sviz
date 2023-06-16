@@ -119,6 +119,12 @@ Usage of ./k8sviz:
         type of output (shorthand) (default "dot")
   -type string
         type of output (default "dot")
+  -selector string
+        label selector (default "")
+  -l string
+        label selector (shorthand) (default "")
+  -field-selector string
+        field selector (default "")
 ```
 
 ## Examples
