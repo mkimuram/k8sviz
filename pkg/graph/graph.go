@@ -17,14 +17,15 @@ import (
 
 // Graph represents a graph of k8s resources
 type Graph struct {
-	dir  string
-	res  *resources.Resources
-	gviz *gographviz.Graph
+	dir       string
+	iconsPath string
+	res       *resources.Resources
+	gviz      *gographviz.Graph
 }
 
 // NewGraph returns a Graph of k8s resources
-func NewGraph(res *resources.Resources, dir string) *Graph {
-	g := &Graph{res: res, dir: dir, gviz: gographviz.NewGraph()}
+func NewGraph(res *resources.Resources, dir, iconsPath string) *Graph {
+	g := &Graph{res: res, dir: dir, iconsPath: iconsPath, gviz: gographviz.NewGraph()}
 	g.generate()
 
 	return g

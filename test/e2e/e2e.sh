@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
 KEEP_RESULT="${KEEP_RESULT:-false}"
 
@@ -74,7 +74,7 @@ function create_cluster() {
 	curl -Lo ${TEST_KIND_BIN} https://kind.sigs.k8s.io/dl/v0.10.0/kind-linux-amd64
 	chmod +x ${TEST_KIND_BIN}
 
-	# Change path for kubeconfig 
+	# Change path for kubeconfig
 	export KUBECONFIG=${TEST_KUBECONFIG_PATH}
 
 	# Create cluster
@@ -91,7 +91,7 @@ function prepare_all() {
 }
 
 function delete_cluster() {
-	# Change path for kubeconfig 
+	# Change path for kubeconfig
 	export KUBECONFIG=${TEST_KUBECONFIG_PATH}
 
 	# Delete cluster

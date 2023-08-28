@@ -24,6 +24,7 @@ import (
 var (
 	testns       = "testns"
 	dir          = "/testdir"
+	iconsPath    = "/testdir/icons"
 	goldenDir    = "testdata"
 	goldenSuffix = ".golden"
 	// if -update flag is specified on test run, golden file for the test will be updated
@@ -121,7 +122,7 @@ var (
 			OwnerReferences: []metav1.OwnerReference{{APIVersion: "batch/v1", Kind: "Job", Name: "job1"}}}},
 		&appsv1.DaemonSet{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "ds1"}},
 		&batchv1.Job{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "job1",
-			OwnerReferences: []metav1.OwnerReference{{APIVersion: "batch/v1beta1", Kind: "cronJob", Name: "cronjob1"}}}},
+			OwnerReferences: []metav1.OwnerReference{{APIVersion: "batch/v1beta1", Kind: "CronJob", Name: "cronjob1"}}}},
 		&batchv1.CronJob{ObjectMeta: metav1.ObjectMeta{Namespace: testns, Name: "cronjob1"}},
 	}
 )
@@ -132,8 +133,7 @@ func prepTestGraph(t *testing.T, objs ...runtime.Object) *Graph {
 	if err != nil {
 		t.Fatalf("NewResources failed: %v", err)
 	}
-
-	return NewGraph(res, dir)
+	return NewGraph(res, dir, iconsPath)
 }
 
 func getGoldenFilePath(name string) string {
