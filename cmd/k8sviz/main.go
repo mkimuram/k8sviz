@@ -24,19 +24,23 @@ const (
 	defaultNamespace   = "default"
 	defaultOutFile     = "k8sviz.out"
 	defaultOutType     = "dot"
+	defaultIconsDir    = "icons"
 	descNamespaceOpt   = "namespace to visualize"
 	descOutFileOpt     = "output filename"
 	descOutTypeOpt     = "type of output"
+	descIconsDirOpt    = "path of directory containing icons"
 	descShortOptSuffix = " (shorthand)"
 )
 
 var (
 	clientset *kubernetes.Clientset
 	dir       string
+	iconsPath string
 	// Flags
 	namespace string
 	outFile   string
 	outType   string
+	iconsDir  string
 )
 
 func init() {
@@ -55,6 +59,8 @@ func init() {
 	flag.StringVar(&outFile, "o", defaultOutFile, descOutFileOpt+descShortOptSuffix)
 	flag.StringVar(&outType, "type", defaultOutType, descOutTypeOpt)
 	flag.StringVar(&outType, "t", defaultOutType, descOutTypeOpt+descShortOptSuffix)
+	flag.StringVar(&iconsDir, "icons", defaultIconsDir, descIconsDirOpt)
+	flag.StringVar(&iconsDir, "i", defaultIconsDir, descIconsDirOpt+descShortOptSuffix)
 	flag.Parse()
 
 	// use the current context in kubeconfig
@@ -83,6 +89,12 @@ func init() {
 		fmt.Fprintf(os.Stderr, "Failed to find the directory of this command: %v\n", err)
 		os.Exit(1)
 	}
+
+	if filepath.IsAbs(iconsDir) {
+		iconsPath = iconsDir
+	} else {
+		iconsPath = filepath.Join(dir, iconsDir)
+	}
 }
 
 func main() {
@@ -97,7 +109,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	g := graph.NewGraph(res, dir)
+	if _, err := os.Stat(iconsPath); err != nil {
+		if os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "Icons cannot be found at path: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
+	g := graph.NewGraph(res, dir, iconsPath)
 
 	if outType == "dot" {
 		if err := g.WriteDotFile(outFile); err != nil {

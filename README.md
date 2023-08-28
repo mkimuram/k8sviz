@@ -48,7 +48,7 @@ $ cd k8sviz
 $ make build
 ```
 
-`icons` directory needs to be in the same directory to the k8sviz binary.
+By default, the `icons` directory is expected to be in the same directory as the `k8sviz` binary.
 So, move them to the proper directory (Replace `PATH_TO_INSTALL` as you like).
 ```shell
 $ PATH_TO_INSTALL=$HOME/bin
@@ -56,6 +56,8 @@ $ cp bin/k8sviz ${PATH_TO_INSTALL}
 $ cp -r icons ${PATH_TO_INSTALL}
 ```
 
+In case you wish to not put them in the same directory, you can run `k8sviz` with the command line flag `--icons` to pass the path to the directory containing the required icons.
+The path can either be relative to the binary (e.g. `../share/icons`) or absolute (e.g. `/usr/share/k8sviz/icons`).
 ## Usage
 ### Bash script version
 ```shell
